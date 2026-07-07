@@ -1946,6 +1946,16 @@ const ViewCalendario = {
     if(action === 'cancelar'){ this.clearSeleccion(); this.render(); return; }
 
     if(action === 'limpiar'){
+      // Si entre los eventos borrados hay algún "ausente" de HOY,
+      // revertir también el switch de asistencia en la pestaña Día de hoy
+      if(fechas.includes(HOY)){
+        const hayAusenteHoy = DB.eventos.some(e=>
+          e.operadorId===operadorId && e.fecha===HOY && e.tipo==='ausente'
+        );
+        if(hayAusenteHoy){
+          DB.asistenciaHoy[`${operadorId}_${HOY}`] = 'presente';
+        }
+      }
       DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha)));
       Toast.show('Selección borrada');
       this.clearSeleccion();

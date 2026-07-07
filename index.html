@@ -456,6 +456,10 @@ h1,h2,h3{font-family:var(--f-display);}
         <svg viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.5" stroke-width="1.5"/><path d="M2 19.5c0-3.5 3.1-5.5 7-5.5s7 2 7 5.5" stroke-width="1.5" stroke-linecap="round"/><circle cx="18" cy="8" r="2.5" stroke-width="1.5"/><path d="M16.5 14c2.5.5 4.5 2 4.5 5" stroke-width="1.5" stroke-linecap="round"/></svg>
         Usuarios
       </button>
+      <button class="rail-tab" data-view="manual">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="11" x2="16" y2="11" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="15" x2="13" y2="15" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Manual
+      </button>
     </div>
     <div class="rail-foot">v1.0</div>
   </nav>
@@ -485,6 +489,7 @@ h1,h2,h3{font-family:var(--f-display);}
     <div class="view view-hidden" id="view-base"></div>
     <div class="view view-hidden" id="view-historial"></div>
     <div class="view view-hidden" id="view-usuarios"></div>
+    <div class="view view-hidden" id="view-manual"></div>
   </div>
 </div>
 
@@ -887,6 +892,7 @@ const Router = {
     base:        { title:'Base de operadores', sub:'Información personal y operativa — fuente de verdad' },
     historial:   { title:'Historial de eventos', sub:'Registros pasados de vacaciones, francos, ausencias y licencias' },
     usuarios:    { title:'Usuarios', sub:'Gestión de accesos y permisos' },
+    manual:      { title:'Manual de usuario', sub:'Guía completa de funciones y lógicas del sistema' },
   },
   renderers: {}, // se completan en cada view-*.js
 
@@ -1479,9 +1485,59 @@ const ViewBase = {
   },
 
   onImportar(){
-    // Importación inicial removida — los operarios se cargan desde Firestore.
-    // Para agregar operarios usá el botón "Nuevo operario" en esta pestaña.
-    Toast.show('Usá el botón "Nuevo operario" para agregar operarios manualmente');
+    if(DB.operadores.length > 0){
+      Toast.show('Ya hay operarios cargados — la importación inicial no está disponible');
+      return;
+    }
+    Modal.open({
+      title: 'Importar lista inicial',
+      bodyHTML: '<p>Se van a cargar <strong>37 operarios</strong> a la base de datos. Esta acción es solo para la carga inicial — usala una sola vez.</p>',
+      confirmText: 'Importar 37 operarios',
+      onConfirm: ()=>{
+        DB.operadores = [
+      { id:'op1', apellidoNombre:'PALERMO, ERNESTO JOSE', direccion:'', legajo:'1134', cuil:'20420549246', fechaIngreso:'2021-06-25', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'e.palermo@unionpel.com.ar' },
+      { id:'op2', apellidoNombre:'VENANCIO, IGNACIO JULIAN', direccion:'', legajo:'1137', cuil:'20411710336', fechaIngreso:'2021-07-21', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'i.venancio@unionpel.com.ar' },
+      { id:'op3', apellidoNombre:'LUJAN, JULIO CESAR', direccion:'Quintana 2575 Talar', legajo:'1172', cuil:'20360795684', fechaIngreso:'2023-07-10', celular:'', turno:'AM', sector:'Ochava', correoEmpresarial:'jclujan@unionpel.com.ar' },
+      { id:'op4', apellidoNombre:'TELLO, LEANDRO EZEQUIEL', direccion:'', legajo:'1029', cuil:'20373873544', fechaIngreso:'2018-07-16', celular:'', turno:'PM', sector:'Ochava', correoEmpresarial:'l.tello@unionpel.com.ar' },
+      { id:'op5', apellidoNombre:'SALINAS, LUCAS AGUSTIN', direccion:'', legajo:'1148', cuil:'20397073425', fechaIngreso:'2022-01-11', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'lu.salinas@unionpel.com.ar' },
+      { id:'op6', apellidoNombre:'SAYAVEDRA, NAHUEL', direccion:'', legajo:'1102', cuil:'20406241441', fechaIngreso:'2021-03-02', celular:'', turno:'AM', sector:'Ochava', correoEmpresarial:'nsayavedra@unionpel.com.ar' },
+      { id:'op7', apellidoNombre:'BRAUN, ANGEL JOSE', direccion:'Monaco 3040 M. savio', legajo:'1144', cuil:'20425953673', fechaIngreso:'2021-11-01', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'a.braun@unionpel.com.ar' },
+      { id:'op8', apellidoNombre:'BUSTAMANTE, AXEL CRUZ', direccion:'Ozanam Federico 3444 D Torcuato', legajo:'1124', cuil:'20414001905', fechaIngreso:'2021-05-10', celular:'', turno:'PM', sector:'Ochava', correoEmpresarial:'a.bustamante@unionpel.com.ar' },
+      { id:'op9', apellidoNombre:'BARRETO, CARLOS ROBERTO', direccion:'', legajo:'', cuil:'', fechaIngreso:'', celular:'', turno:'AM', sector:'Coordinacion', correoEmpresarial:'c.barreto@unionpel.com.ar' },
+      { id:'op10', apellidoNombre:'ARGÜELLO, DIEGO JAVIER', direccion:'', legajo:'785', cuil:'20347308448', fechaIngreso:'2015-11-02', celular:'', turno:'AM', sector:'Coordinacion', correoEmpresarial:'d.arguello@unionpel.com.ar' },
+      { id:'op11', apellidoNombre:'FERRARA FAMA, ESTEBAN ANDRES', direccion:'R de Escalada 732 Escobar', legajo:'1074', cuil:'20381783384', fechaIngreso:'2019-08-01', celular:'', turno:'AM', sector:'Informatica', correoEmpresarial:'e.ferrara@unionpel.com.ar' },
+      { id:'op12', apellidoNombre:'AGÜERO, ENZO MIGUEL', direccion:'Pje Arrieta 1834 A. Sourdeaux', legajo:'1128', cuil:'20421145688', fechaIngreso:'2021-05-24', celular:'', turno:'AM', sector:'Pruebas', correoEmpresarial:'eaguero@unionpel.com.ar' },
+      { id:'op13', apellidoNombre:'SANCHEZ, JUAN PABLO', direccion:'', legajo:'1157', cuil:'20345903845', fechaIngreso:'2022-07-08', celular:'', turno:'AM', sector:'Pruebas', correoEmpresarial:'juansanchez@unionpel.com.ar' },
+      { id:'op14', apellidoNombre:'MENDOZA, MARCOS ENRIQUE', direccion:'Chiclana 337 Pacheco', legajo:'754', cuil:'23-32.421.554-9', fechaIngreso:'2014-02-03', celular:'', turno:'PM', sector:'Estetica', correoEmpresarial:'m.mendoza@unionpel.com.ar' },
+      { id:'op15', apellidoNombre:'Agustin Farias', direccion:'Quintana 2298 S. Fernando', legajo:'1016', cuil:'20386593346', fechaIngreso:'2018-04-23', celular:'', turno:'PM', sector:'Movimientos', correoEmpresarial:'ma.farias@unionpel.com.ar' },
+      { id:'op16', apellidoNombre:'LUQUES, MARIANO EZEQUIEL', direccion:'Villa de mayo 4698 A. Sourdeaux', legajo:'1104', cuil:'20391179361', fechaIngreso:'2021-03-03', celular:'', turno:'AM', sector:'Ochava', correoEmpresarial:'mluques@unionpel.com.ar' },
+      { id:'op17', apellidoNombre:'CAPPELLERE, PABLO EMMANUEL', direccion:'Potosi 5461 JC paz', legajo:'1070', cuil:'20359492945', fechaIngreso:'2019-04-15', celular:'', turno:'AM', sector:'Movimientos', correoEmpresarial:'pcappellere@unionpel.com.ar' },
+      { id:'op18', apellidoNombre:'PAIVA, PABLO NICOLAS', direccion:'', legajo:'755', cuil:'20380097940', fechaIngreso:'2014-02-10', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'ppaiva@unionpel.com.ar' },
+      { id:'op19', apellidoNombre:'FESTA, RODRIGO NAHUEL', direccion:'', legajo:'792', cuil:'20372265044', fechaIngreso:'2015-12-17', celular:'', turno:'AM', sector:'Coordinacion', correoEmpresarial:'r.festa@unionpel.com.ar' },
+      { id:'op20', apellidoNombre:'LARA, RODRIGO LEONEL', direccion:'R Peña 1372 El talar', legajo:'1109', cuil:'20400937401', fechaIngreso:'2021-03-10', celular:'', turno:'PM', sector:'Guardado', correoEmpresarial:'rlara@unionpel.com.ar' },
+      { id:'op21', apellidoNombre:'RUIZ DIAZ, RENZO ROMAN', direccion:'', legajo:'1152', cuil:'20435150536', fechaIngreso:'2022-05-09', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'rruiz@unionpel.com.ar' },
+      { id:'op22', apellidoNombre:'VAZQUEZ, SERGIO NAHUEL', direccion:'', legajo:'1108', cuil:'20452034787', fechaIngreso:'2021-03-10', celular:'', turno:'AM', sector:'Guardado', correoEmpresarial:'snvazquez@unionpel.com.ar' },
+      { id:'op23', apellidoNombre:'REINAGA, SANTIAGO EZEQUIEL', direccion:'', legajo:'1111', cuil:'20391564079', fechaIngreso:'2021-03-12', celular:'', turno:'AM', sector:'Ochava', correoEmpresarial:'sreinaga@unionpel.com.ar' },
+      { id:'op24', apellidoNombre:'ACOSTA ANDRES, SANTIAGO E.', direccion:'Tucuman 336 Garin', legajo:'990', cuil:'27361502391', fechaIngreso:'2017-02-01', celular:'', turno:'PM', sector:'Estetica', correoEmpresarial:'' },
+      { id:'op25', apellidoNombre:'AGÜERO, LUCAS JUAN DAVID', direccion:'Posadas 50 El talar', legajo:'1165', cuil:'20422832484', fechaIngreso:'2023-04-11', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op26', apellidoNombre:'BARBONA, ANIBAL', direccion:'Lucio Mancilla 550 Pacheco', legajo:'1156', cuil:'20360586074', fechaIngreso:'2022-07-08', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op27', apellidoNombre:'CRUZ, JORGE ANTONIO', direccion:'Estrada 5575 Virreyes', legajo:'1069', cuil:'20362493170', fechaIngreso:'2019-04-15', celular:'', turno:'AM', sector:'Estetica', correoEmpresarial:'' },
+      { id:'op28', apellidoNombre:'FRANCO MAXIMILIANO GASTÓN', direccion:'', legajo:'1188', cuil:'32361944', fechaIngreso:'2025-06-17', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op29', apellidoNombre:'GALLARDO, KEVIN AGUSTIN', direccion:'Santa Angela 3025   escobar', legajo:'1125', cuil:'20423461218', fechaIngreso:'2021-05-10', celular:'', turno:'AM', sector:'Estetica', correoEmpresarial:'' },
+      { id:'op30', apellidoNombre:'GODOY, LUCAS NICOLAS', direccion:'', legajo:'1047', cuil:'20385472847', fechaIngreso:'2018-12-10', celular:'', turno:'AM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op31', apellidoNombre:'GOMEZ, LUCIANO EZEQUIEL MAXIMILIANO', direccion:'', legajo:'1127', cuil:'20388209950', fechaIngreso:'2021-05-24', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op32', apellidoNombre:'GONZALEZ, MAURO DAVID', direccion:'Oribe 3877 J.C.Paz', legajo:'1064', cuil:'20383912246', fechaIngreso:'2019-03-20', celular:'', turno:'AM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op33', apellidoNombre:'MAZUR, LAUTARO TOMAS', direccion:'Santa Cruz 20  Escobar', legajo:'1103', cuil:'20410992494', fechaIngreso:'2021-03-02', celular:'', turno:'PM', sector:'Guardado', correoEmpresarial:'' },
+      { id:'op34', apellidoNombre:'MEDINA, MARCELO NAHUEL', direccion:'Monaco 2980 Savio', legajo:'1164', cuil:'20428406134', fechaIngreso:'2023-04-11', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op35', apellidoNombre:'PADILLA FEDERICO', direccion:'', legajo:'1189', cuil:'', fechaIngreso:'', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op36', apellidoNombre:'QUINTEROS, ALEX SEBASTIAN', direccion:'', legajo:'1118', cuil:'20433910894', fechaIngreso:'2021-04-07', celular:'', turno:'AM', sector:'Pruebas', correoEmpresarial:'' },
+      { id:'op37', apellidoNombre:'ZALAZAR RAMIREZ, ALEN', direccion:'', legajo:'1122', cuil:'20429471185', fechaIngreso:'2021-04-23', celular:'', turno:'PM', sector:'Pruebas', correoEmpresarial:'' },
+        ];
+        Toast.show('37 operarios importados correctamente');
+        this.render();
+        Bus.emit();
+      }
+    });
   },
 
   onNuevo(){
@@ -3646,6 +3702,377 @@ const ViewUsuarios = {
 };
 
 Router.renderers.usuarios = () => ViewUsuarios.render();
+
+
+/* =======================================================================
+   view-manual.js — Manual de usuario integrado en la app
+   ======================================================================= */
+
+const ViewManual = {
+  render(){
+    const el = document.getElementById('view-manual');
+    el.innerHTML = `
+      <div class="manual-wrap">
+        <!-- ÍNDICE LATERAL FIJO -->
+        <nav class="manual-nav">
+          <div class="manual-nav-title">Contenido</div>
+          <a href="#man-1" class="manual-nav-link">1. Inicio de sesión y roles</a>
+          <a href="#man-2" class="manual-nav-link">2. Día de hoy</a>
+          <a href="#man-3" class="manual-nav-link">3. Calendario</a>
+          <a href="#man-4" class="manual-nav-link">4. Vacaciones</a>
+          <a href="#man-5" class="manual-nav-link">5. Compensatorios</a>
+          <a href="#man-6" class="manual-nav-link">6. Anotaciones</a>
+          <a href="#man-7" class="manual-nav-link">7. Base de operadores</a>
+          <a href="#man-8" class="manual-nav-link">8. Historial de eventos</a>
+          <a href="#man-9" class="manual-nav-link">9. Usuarios (admin)</a>
+          <a href="#man-10" class="manual-nav-link">10. Resumen de lógicas</a>
+        </nav>
+
+        <!-- CONTENIDO -->
+        <div class="manual-body" id="manualBody">
+
+          <div class="manual-portada">
+            <div class="manual-portada-titulo">CONTROL PERSONAL</div>
+            <div class="manual-portada-sub">Manual de Usuario</div>
+          </div>
+
+          <!-- 1 -->
+          <section id="man-1" class="manual-section">
+            <h2 class="man-h2">1. Inicio de sesión y roles de usuario</h2>
+            <p class="man-p">Al abrir la app aparece una pantalla de login. Ingresá tu usuario y contraseña para acceder.</p>
+            <h3 class="man-h3">Roles disponibles</h3>
+            <div class="man-card">
+              <div class="man-rol-item"><span class="man-badge admin">Administrador</span><span>Acceso total. Puede crear y borrar usuarios. Es el único que ve la pestaña "Usuarios".</span></div>
+              <div class="man-rol-item"><span class="man-badge total">Permiso total</span><span>Puede ver y editar todas las pestañas, excepto gestionar usuarios.</span></div>
+              <div class="man-rol-item"><span class="man-badge parcial">Permiso parcial</span><span>Solo puede editar "Día de hoy". El resto lo puede ver pero no modificar.</span></div>
+            </div>
+            <div class="man-nota">📌 El botón <strong>"Mi contraseña"</strong> en la barra superior permite a cualquier usuario cambiar su propia contraseña en cualquier momento.</div>
+          </section>
+
+          <!-- 2 -->
+          <section id="man-2" class="manual-section">
+            <h2 class="man-h2">2. Pestaña: Día de hoy</h2>
+            <p class="man-p">Pantalla principal. Muestra el estado de asistencia de todos los operarios agrupados por turno.</p>
+            <h3 class="man-h3">Cuadros de asistencia</h3>
+            <ul class="man-list">
+              <li><strong>AM — Mañana:</strong> operarios con turno AM, sin contar coordinadores.</li>
+              <li><strong>PM — Tarde:</strong> operarios con turno PM, sin contar coordinadores.</li>
+              <li><strong>Coordinadores:</strong> operarios del sector Coordinación, en un cuadro separado.</li>
+            </ul>
+            <p class="man-p">Cada operario tiene dos botones:</p>
+            <ul class="man-list">
+              <li><span class="man-tag verde">Presente</span> — estado por defecto al iniciar el día.</li>
+              <li><span class="man-tag rojo">Ausente</span> — al marcarlo, queda registrado y se refleja en el Calendario.</li>
+            </ul>
+            <div class="man-nota">📌 El switch Presente/Ausente se puede cambiar en cualquier momento durante el día.</div>
+            <h3 class="man-h3">Ordenar los cuadros</h3>
+            <p class="man-p">El selector "Ordenar" arriba a la derecha tiene dos opciones: <strong>Alfabético</strong> o <strong>Por sector</strong>. Aplica a los tres cuadros simultáneamente.</p>
+            <h3 class="man-h3">Cuadros informativos laterales</h3>
+            <ul class="man-list">
+              <li><strong>Próximos eventos:</strong> alertas de vacaciones o licencias por comenzar o terminar.</li>
+              <li><strong>Vacaciones del mes:</strong> vacaciones asignadas para el mes siguiente. Tiene botón Exportar Excel.</li>
+            </ul>
+          </section>
+
+          <!-- 3 -->
+          <section id="man-3" class="manual-section">
+            <h2 class="man-h2">3. Pestaña: Calendario</h2>
+            <p class="man-p">Calendario tipo Gantt con todos los operarios y sus eventos asignados mes a mes.</p>
+            <h3 class="man-h3">Navegación y filtros</h3>
+            <ul class="man-list">
+              <li>Flechas <strong>&lt; &gt;</strong> para cambiar de mes. Al abrir, se centra automáticamente en la fecha actual.</li>
+              <li>Botones <strong>AM / PM / Coordinadores</strong>: muestran u ocultan cada cuadro. Al ocultar uno, los demás se expanden.</li>
+            </ul>
+            <h3 class="man-h3">Asignar un evento</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Hacé clic en la celda del día (o arrastrá para varios días).</div>
+              <div class="man-paso"><span class="man-num">2</span>Aparece un panel inferior con el nombre del operario y los días seleccionados.</div>
+              <div class="man-paso"><span class="man-num">3</span>Elegí el tipo de evento y confirmá.</div>
+            </div>
+            <h3 class="man-h3">Tipos de eventos</h3>
+            <table class="man-table">
+              <thead><tr><th>Tipo</th><th>Descripción</th><th>Efecto en saldo</th></tr></thead>
+              <tbody>
+                <tr><td><span class="man-color" style="background:#FBF1DE;color:#8A6520;">Vacaciones</span></td><td>Días de descanso programados</td><td>Descuenta del saldo disponible</td></tr>
+                <tr><td><span class="man-color" style="background:#FAEAE8;color:#C0524A;">Licencia</span></td><td>Ausencia por motivo justificado</td><td>No descuenta vacaciones</td></tr>
+                <tr><td><span class="man-color" style="background:#D8EFE5;color:#2E7A5C;">Compensatorio</span></td><td>Franco compensatorio</td><td>Consume un crédito (FIFO)</td></tr>
+                <tr><td><span class="man-color" style="background:#FAEAE8;color:#C0524A;">Ausente</span></td><td>Ausencia sin justificación / corrección retroactiva</td><td>Sin efecto en saldos</td></tr>
+                <tr><td><span class="man-color" style="background:#2A3245;color:#fff;">Cambio de turno</span></td><td>Cambio horario puntual</td><td>Sin efecto en saldos</td></tr>
+              </tbody>
+            </table>
+            <div class="man-nota">📌 Los sábados y domingos aparecen con fondo gris azulado. Se pueden asignar eventos igual en esos días si corresponde.</div>
+            <h3 class="man-h3">Borrar un evento</h3>
+            <p class="man-p">Seleccioná la celda → panel inferior → <strong>"Borrar selección"</strong>.</p>
+          </section>
+
+          <!-- 4 -->
+          <section id="man-4" class="manual-section">
+            <h2 class="man-h2">4. Pestaña: Vacaciones</h2>
+            <h3 class="man-h3">Concepto de período</h3>
+            <p class="man-p">Los créditos de vacaciones se organizan en períodos anuales en formato <strong>AAAA/AAAA+1</strong> (ej: 2026/2027). El período representa el año laboral, no el año calendario.</p>
+            <h3 class="man-h3">Lectura de la tabla de operarios</h3>
+            <table class="man-table">
+              <thead><tr><th>Columna</th><th>Qué muestra</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Operador (Xd)</strong></td><td>Nombre y total de días de crédito cargados</td></tr>
+                <tr><td><strong>Asignadas (en calendario)</strong></td><td>Días ya asignados en el calendario que aún no se disfrutaron</td></tr>
+                <tr><td><strong>Disponibles</strong></td><td>Días que todavía quedan libres para asignar</td></tr>
+              </tbody>
+            </table>
+            <p class="man-p">La flecha ▾ al lado de cada nombre despliega el detalle de períodos. Los períodos agotados aparecen tachados.</p>
+            <h3 class="man-h3">Cargar créditos a un operario</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Seleccioná el operario en el formulario superior.</div>
+              <div class="man-paso"><span class="man-num">2</span>Elegí el período (ej: 2026/2027).</div>
+              <div class="man-paso"><span class="man-num">3</span>Elegí la cantidad de días: 7, 14, 21 o 28.</div>
+              <div class="man-paso"><span class="man-num">4</span>Hacé clic en "Confirmar carga" y confirmá el modal.</div>
+            </div>
+            <p class="man-p">Si el operario ya tenía crédito para ese período, los días se <strong>suman</strong>. Si no tenía, se crea un lote nuevo.</p>
+            <h3 class="man-h3">Asignar a todos</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Hacé clic en "+ Asignar a todos".</div>
+              <div class="man-paso"><span class="man-num">2</span>Elegí el período y la cantidad de días.</div>
+              <div class="man-paso"><span class="man-num">3</span>Confirmá — cada operario recibe individualmente esa cantidad.</div>
+            </div>
+            <h3 class="man-h3">Lógica de descuento (FIFO)</h3>
+            <div class="man-card">
+              <p class="man-p" style="margin:0;">Al asignar días en el Calendario, se descuenta automáticamente empezando por el <strong>período más antiguo</strong> con saldo disponible.</p>
+              <p class="man-p" style="margin:8px 0 0;"><strong>Ejemplo:</strong> Palermo tiene 7 días del período 2024/2025 y 14 del 2025/2026. Al asignar 10 días en el calendario, se consumen los 7 del período viejo + 3 del siguiente.</p>
+            </div>
+            <h3 class="man-h3">Qué pasa cuando las vacaciones vencen</h3>
+            <ul class="man-list">
+              <li><strong>Calendario:</strong> la celda cambia a color gris opaco (ya disfrutadas).</li>
+              <li><strong>Pestaña Vacaciones:</strong> esos días dejan de contar en "Disponibles".</li>
+              <li><strong>Historial:</strong> quedan registrados automáticamente.</li>
+            </ul>
+            <div class="man-nota">📌 Si borrás un lote de crédito que ya tenía días asignados en el calendario, el sistema borra automáticamente los días futuros para que el saldo no quede negativo, y te avisa cuántos quitó.</div>
+          </section>
+
+          <!-- 5 -->
+          <section id="man-5" class="manual-section">
+            <h2 class="man-h2">5. Pestaña: Compensatorios</h2>
+            <p class="man-p">Gestiona los días a favor que los operarios obtienen por trabajar en días no laborables.</p>
+            <h3 class="man-h3">Concepto</h3>
+            <p class="man-p">Un <strong>compensatorio</strong> es un crédito acumulado por haber trabajado un día extra o en feriado. Ese crédito se canjea luego por un <strong>franco compensatorio</strong> — un día libre que consume el crédito.</p>
+            <h3 class="man-h3">Asignación grupal por fecha</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Hacé clic en "+ Nueva fecha".</div>
+              <div class="man-paso"><span class="man-num">2</span>Seleccioná la fecha del día trabajado.</div>
+              <div class="man-paso"><span class="man-num">3</span>Agregá los operarios uno a uno. Para cada uno podés indicar el rango horario.</div>
+              <div class="man-paso"><span class="man-num">4</span>Hacé clic en "Confirmar grupo". Cada operario recibe 1 crédito vinculado a esa fecha.</div>
+            </div>
+            <p class="man-p">Mientras la fecha no haya pasado, el cuadro permanece con botones de <strong>Editar</strong>, <strong>Exportar Excel</strong> y <strong>Borrar</strong>.</p>
+            <div class="man-nota">📌 El Excel del grupo incluye columnas: Nombre, Fecha, Horario desde, Horario hasta — ideal para enviar por correo como registro.</div>
+            <h3 class="man-h3">Asignación individual</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Seleccioná el operario.</div>
+              <div class="man-paso"><span class="man-num">2</span>Ingresá una fecha (opcional) o dejá en blanco para "sin fecha".</div>
+              <div class="man-paso"><span class="man-num">3</span>Hacé clic en "Confirmar". El operario recibe 1 crédito.</div>
+            </div>
+            <h3 class="man-h3">Cuadro "Días a favor"</h3>
+            <p class="man-p">Muestra solo los operarios con créditos disponibles (saldo &gt; 0). La flecha ▾ despliega el detalle de cada crédito: si es grupal o individual, la fecha de origen, y si ya fue tomado.</p>
+            <h3 class="man-h3">Lógica de descuento (FIFO)</h3>
+            <div class="man-card">
+              <p class="man-p" style="margin:0;">Al asignar un franco en el Calendario, se consume <strong>automáticamente el crédito más antiguo</strong> disponible. Los créditos sin fecha se tratan como los más antiguos y se consumen primero.</p>
+            </div>
+            <div class="man-nota">📌 No podés asignar un franco si el operario no tiene créditos disponibles. El botón aparece deshabilitado.</div>
+          </section>
+
+          <!-- 6 -->
+          <section id="man-6" class="manual-section">
+            <h2 class="man-h2">6. Pestaña: Anotaciones</h2>
+            <p class="man-p">Permite registrar novedades o notas por operario, y notas generales para el equipo.</p>
+            <ul class="man-list">
+              <li>Agregá operarios a la lista de seguimiento con el botón correspondiente.</li>
+              <li>Para cada operario podés escribir anotaciones con fecha.</li>
+              <li>Al pie hay un campo de <strong>"Notas generales"</strong> para observaciones que aplican a todo el grupo.</li>
+            </ul>
+          </section>
+
+          <!-- 7 -->
+          <section id="man-7" class="manual-section">
+            <h2 class="man-h2">7. Pestaña: Base de operadores</h2>
+            <p class="man-p">Registro maestro de todos los operarios con datos personales y operativos.</p>
+            <h3 class="man-h3">Acciones disponibles</h3>
+            <ul class="man-list">
+              <li><strong>Editar:</strong> hacé clic en cualquier celda para modificar el dato directamente.</li>
+              <li><strong>Nuevo operario:</strong> agrega una fila nueva para completar.</li>
+              <li><strong>Exportar Excel:</strong> descarga toda la base en formato .xlsx.</li>
+              <li><strong>Ordenar:</strong> por Nombre, Sector, Turno o Legajo usando el desplegable.</li>
+            </ul>
+            <div class="man-nota">📌 Los operarios del sector <strong>Coordinación</strong> aparecen en el cuadro "Coordinadores" en Día de hoy, Calendario y Vacaciones — separados de AM y PM.</div>
+          </section>
+
+          <!-- 8 -->
+          <section id="man-8" class="manual-section">
+            <h2 class="man-h2">8. Pestaña: Historial de eventos</h2>
+            <p class="man-p">Muestra en tres cuadros paralelos el registro de eventos ya pasados. Se actualiza automáticamente sin acción manual.</p>
+            <table class="man-table">
+              <thead><tr><th>Cuadro</th><th>Qué muestra</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Compensatorios tomados</strong></td><td>Francos cuya fecha de goce ya pasó, con fecha de origen y día tomado.</td></tr>
+                <tr><td><strong>Vacaciones disfrutadas</strong></td><td>Bloques de vacaciones vencidos, con rango de fechas y días.</td></tr>
+                <tr><td><strong>Ausencias y licencias</strong></td><td>Contador histórico por operario. Hacé clic en el número para ver el detalle de fechas.</td></tr>
+              </tbody>
+            </table>
+            <div class="man-nota">📌 Podés quitar un registro del historial con el botón borrar, pero el evento sigue marcado en el Calendario.</div>
+          </section>
+
+          <!-- 9 -->
+          <section id="man-9" class="manual-section">
+            <h2 class="man-h2">9. Pestaña: Usuarios (solo administrador)</h2>
+            <p class="man-p">Esta pestaña solo es visible para el rol Administrador.</p>
+            <h3 class="man-h3">Crear un usuario nuevo</h3>
+            <div class="man-pasos">
+              <div class="man-paso"><span class="man-num">1</span>Ingresá el nombre de usuario (ej: jperez).</div>
+              <div class="man-paso"><span class="man-num">2</span>Ingresá una contraseña (mínimo 6 caracteres). Se la pasás al usuario por fuera de la app.</div>
+              <div class="man-paso"><span class="man-num">3</span>Seleccioná el permiso: "Permiso total" o "Permiso parcial".</div>
+              <div class="man-paso"><span class="man-num">4</span>Hacé clic en "Crear usuario".</div>
+            </div>
+            <h3 class="man-h3">Borrar un usuario</h3>
+            <p class="man-p">En la lista de usuarios, hacé clic en el ícono de borrar. El usuario pierde el acceso inmediatamente.</p>
+            <h3 class="man-h3">Contraseña olvidada</h3>
+            <p class="man-p">No hay recuperación desde la app. El admin debe borrar el usuario y crearlo de nuevo con nueva contraseña.</p>
+            <h3 class="man-h3">Cambiar mi propia contraseña</h3>
+            <p class="man-p">Cualquier usuario puede hacerlo desde el botón <strong>"Mi contraseña"</strong> en la barra superior. Se requiere ingresar la contraseña actual.</p>
+          </section>
+
+          <!-- 10 -->
+          <section id="man-10" class="manual-section">
+            <h2 class="man-h2">10. Resumen de lógicas y descuentos</h2>
+            <h3 class="man-h3">Vacaciones — flujo completo</h3>
+            <table class="man-table">
+              <thead><tr><th>Paso</th><th>Acción</th><th>Efecto</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Cargar crédito en pestaña Vacaciones</td><td>Aparece saldo disponible para el operario</td></tr>
+                <tr><td>2</td><td>Asignar días en el Calendario</td><td>Se descuenta del saldo (FIFO por período)</td></tr>
+                <tr><td>3</td><td>Fecha pasa</td><td>Color opaco en Calendario, pasa automáticamente al Historial</td></tr>
+              </tbody>
+            </table>
+            <h3 class="man-h3">Compensatorios — flujo completo</h3>
+            <table class="man-table">
+              <thead><tr><th>Paso</th><th>Acción</th><th>Efecto</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Asignar grupal o individual</td><td>Aparece crédito en "Días a favor"</td></tr>
+                <tr><td>2</td><td>Asignar franco en el Calendario</td><td>Se descuenta el crédito más antiguo (FIFO)</td></tr>
+                <tr><td>3</td><td>Fecha del franco pasa</td><td>Aparece en Historial como "Compensatorio tomado"</td></tr>
+              </tbody>
+            </table>
+            <h3 class="man-h3">Reglas importantes</h3>
+            <ul class="man-list">
+              <li><strong>FIFO siempre:</strong> tanto vacaciones como compensatorios consumen primero el crédito más antiguo.</li>
+              <li><strong>Un compensatorio = un día:</strong> solo se puede asignar un día suelto por vez como franco.</li>
+              <li><strong>El Calendario es la fuente de verdad:</strong> los eventos vencidos quedan visibles en color opaco, nunca desaparecen solos.</li>
+              <li><strong>El Historial es automático:</strong> no requiere acción manual, se actualiza cuando una fecha pasa.</li>
+              <li><strong>Ausencias en "Día de hoy"</strong> se reflejan automáticamente en el Calendario del mismo día.</li>
+              <li><strong>Ausencias pasadas</strong> se pueden corregir desde el Calendario seleccionando el día y eligiendo "Ausente".</li>
+            </ul>
+          </section>
+
+        </div><!-- /manual-body -->
+      </div><!-- /manual-wrap -->
+    `;
+
+    // Inyectar estilos
+    if(!document.getElementById('manualStyles')){
+      const st = document.createElement('style');
+      st.id = 'manualStyles';
+      st.textContent = `
+        .manual-wrap{ display:grid; grid-template-columns:220px 1fr; height:100%; overflow:hidden; }
+        .manual-nav{
+          background:var(--paper-dim); border-right:1px solid var(--line);
+          padding:20px 0; overflow-y:auto; position:sticky; top:0; height:100%;
+        }
+        .manual-nav-title{
+          font-family:var(--f-display); font-size:10px; font-weight:800;
+          text-transform:uppercase; letter-spacing:.1em; color:var(--ink-dim);
+          padding:0 18px 12px; border-bottom:1px solid var(--line); margin-bottom:8px;
+        }
+        .manual-nav-link{
+          display:block; padding:8px 18px; font-size:11.5px; font-weight:600;
+          color:var(--ink-dim); text-decoration:none; border-left:3px solid transparent;
+          transition:all .15s; line-height:1.3;
+        }
+        .manual-nav-link:hover{ color:var(--steel); background:var(--steel-soft); border-left-color:var(--steel); }
+        .manual-nav-link.active{ color:var(--steel); background:var(--steel-soft); border-left-color:var(--steel); font-weight:700; }
+
+        .manual-body{ overflow-y:auto; padding:32px 48px; }
+        .manual-portada{ text-align:center; padding:40px 0 48px; border-bottom:2px solid var(--line); margin-bottom:40px; }
+        .manual-portada-titulo{ font-family:var(--f-display); font-size:40px; font-weight:800; color:var(--navy); letter-spacing:.05em; }
+        .manual-portada-sub{ font-size:22px; color:var(--steel); margin-top:8px; font-style:italic; }
+
+        .manual-section{ margin-bottom:48px; padding-bottom:32px; border-bottom:1px solid var(--line); scroll-margin-top:24px; }
+        .man-h2{
+          font-family:var(--f-display); font-size:22px; font-weight:800; color:var(--navy);
+          margin:0 0 18px; padding-bottom:10px; border-bottom:2px solid var(--steel-soft);
+        }
+        .man-h3{ font-family:var(--f-display); font-size:14px; font-weight:700; color:var(--steel); margin:22px 0 10px; text-transform:uppercase; letter-spacing:.05em; }
+        .man-p{ font-size:13px; line-height:1.7; color:var(--ink); margin:0 0 10px; }
+        .man-list{ font-size:13px; line-height:1.7; color:var(--ink); padding-left:20px; margin:8px 0 12px; }
+        .man-list li{ margin-bottom:5px; }
+        .man-nota{
+          background:var(--steel-soft); border-left:4px solid var(--steel);
+          border-radius:0 8px 8px 0; padding:12px 16px; font-size:12px;
+          line-height:1.6; color:var(--ink); margin:14px 0;
+        }
+        .man-card{
+          background:var(--paper-dim); border:1px solid var(--line); border-radius:8px;
+          padding:16px 18px; margin:10px 0;
+        }
+        .man-rol-item{ display:flex; align-items:flex-start; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
+        .man-rol-item:last-child{ border-bottom:none; padding-bottom:0; }
+        .man-badge{ display:inline-block; padding:3px 10px; border-radius:12px; font-size:10.5px; font-weight:700; white-space:nowrap; flex:0 0 auto; }
+        .man-badge.admin{ background:var(--navy); color:#fff; }
+        .man-badge.total{ background:var(--steel); color:#fff; }
+        .man-badge.parcial{ background:var(--umber-soft); color:var(--umber); }
+        .man-tag{ display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+        .man-tag.verde{ background:var(--sage-soft); color:var(--sage); }
+        .man-tag.rojo{ background:var(--brick-soft); color:var(--brick); }
+
+        .man-pasos{ display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+        .man-paso{ display:flex; align-items:flex-start; gap:12px; font-size:13px; line-height:1.6; color:var(--ink); }
+        .man-num{
+          display:inline-flex; align-items:center; justify-content:center;
+          width:24px; height:24px; min-width:24px; border-radius:50%;
+          background:var(--steel); color:#fff; font-weight:700; font-size:12px;
+        }
+
+        .man-table{ width:100%; border-collapse:collapse; font-size:12.5px; margin:10px 0 14px; }
+        .man-table th{ background:var(--steel); color:#fff; padding:8px 12px; text-align:left; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+        .man-table td{ padding:8px 12px; border-bottom:1px solid var(--line); color:var(--ink); }
+        .man-table tbody tr:nth-child(even) td{ background:var(--paper-dim); }
+        .man-color{ display:inline-block; padding:2px 10px; border-radius:4px; font-size:11.5px; font-weight:600; }
+      `;
+      document.head.appendChild(st);
+    }
+
+    // Índice activo al hacer scroll
+    const body = el.querySelector('#manualBody');
+    const links = el.querySelectorAll('.manual-nav-link');
+    const sections = el.querySelectorAll('.manual-section');
+    body.addEventListener('scroll', ()=>{
+      let current = '';
+      sections.forEach(sec=>{
+        if(sec.offsetTop - body.scrollTop <= 60) current = sec.id;
+      });
+      links.forEach(l=>{
+        l.classList.toggle('active', l.getAttribute('href') === '#'+current);
+      });
+    });
+
+    // Click en el índice → scroll suave a la sección
+    links.forEach(link=>{
+      link.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const id = link.getAttribute('href').slice(1);
+        const target = el.querySelector('#'+id);
+        if(target) target.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    });
+  }
+};
+
+Router.renderers.manual = () => ViewManual.render();
 
 
 

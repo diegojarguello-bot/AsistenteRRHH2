@@ -1,0 +1,3759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Personal — RRHH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  /* Paleta celeste — inspirada en la imagen de referencia */
+  --navy:#1565C0;          /* celeste intenso (más izquierda de la imagen) */
+  --navy-soft:#1976D2;     /* celeste medio */
+  --paper:#F5F9FF;         /* fondo principal: blanco con leve tinte azul */
+  --paper-dim:#E8F1FB;     /* fondos secundarios, hover */
+  --line:#C8DCF5;          /* bordes y separadores */
+  --steel:#1E88E5;         /* azul corporativo principal */
+  --steel-soft:#DDEEFF;    /* fondos de header de tabla */
+  --umber:#5277A8;
+  --umber-soft:#DBE8F7;
+  --amber:#1E88E5;
+  --amber-soft:#D6EAFB;
+  --brick:#C0524A;
+  --brick-soft:#FAEAE8;
+  --sage:#2E7A5C;
+  --sage-soft:#D8EFE5;
+  --vacation:#C9952E;
+  --vacation-soft:#FBF1DE;
+  --ink:#0D2137;           /* texto principal: casi negro con tinte azul */
+  --ink-dim:#4A6080;       /* texto secundario */
+  --white:#FFFFFF;
+
+  --f-display:'Archivo',sans-serif;
+  --f-body:'IBM Plex Sans',sans-serif;
+  --f-mono:'IBM Plex Mono',monospace;
+
+  --radius:8px;
+  --shadow-card:0 1px 3px rgba(21,101,192,.06), 0 4px 16px rgba(21,101,192,.10);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--f-body);
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;}
+::selection{background:var(--amber-soft);}
+
+/* visible keyboard focus */
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--steel);
+  outline-offset:2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+}
+
+/* ===================== SHELL ===================== */
+.app-shell{
+  display:flex;
+  height:100vh;
+  width:100vw;
+  overflow:hidden;
+}
+
+/* ---- Sidebar rail ---- */
+.rail{
+  width:90px;
+  flex:0 0 90px;
+  background:linear-gradient(180deg, #E8F1FB 0%, #DDEEFF 100%);
+  border-right:1px solid var(--line);
+  box-shadow:2px 0 12px rgba(21,101,192,.08);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:18px 0 14px;
+  position:relative;
+  z-index:5;
+}
+.rail-tabs{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  width:100%;
+  align-items:center;
+  flex:1;
+}
+.rail-tab{
+  width:76px;
+  background:none;
+  border:none;
+  color:var(--umber);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  padding:12px 4px;
+  border-radius:var(--radius);
+  font-size:10.5px;
+  font-weight:700;
+  line-height:1.25;
+  text-align:center;
+  letter-spacing:.01em;
+  transition:background .15s, color .15s, transform .1s;
+}
+.rail-tab svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.5;}
+.rail-tab:hover{background:rgba(30,136,229,.15);color:var(--steel);transform:scale(1.04);}
+.rail-tab.active{
+  background:linear-gradient(135deg, var(--steel) 0%, var(--navy-soft) 100%);
+  color:var(--white);
+  box-shadow:0 3px 10px rgba(21,101,192,.35);
+}
+.rail-tab.active svg{stroke:var(--white);}
+.rail-foot{
+  color:var(--ink-dim);
+  opacity:.5;
+  font-size:9px;
+  letter-spacing:.06em;
+  margin-top:10px;
+}
+
+/* ---- Main area ---- */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  min-width:0;
+}
+.topbar{
+  height:60px;
+  flex:0 0 60px;
+  background:var(--white);
+  border-bottom:2px solid #90CAF9;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+}
+.topbar h1{
+  font-family:var(--f-display);
+  font-weight:700;
+  font-size:18px;
+  margin:0;
+  letter-spacing:-.01em;
+}
+.topbar .sub{
+  font-size:12px;
+  color:var(--ink-dim);
+  margin-top:1px;
+}
+.topbar-date{
+  font-family:var(--f-display);
+  font-size:13.5px;
+  font-weight:600;
+  letter-spacing:.01em;
+  color:var(--navy);
+  background:var(--amber-soft);
+  border:1px solid #CFE3F5;
+  padding:7px 16px;
+  border-radius:20px;
+}
+
+.view{
+  flex:1;
+  overflow:auto;
+  padding:24px 28px 40px;
+}
+.view-hidden{display:none !important;}
+
+/* ===================== SHARED UI ===================== */
+.panel{
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-card);
+}
+/* Headers de tabla con tinte celeste global */
+.panel thead th{
+  background:var(--steel-soft) !important;
+  color:var(--navy) !important;
+}
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  border-bottom:2px solid var(--line);
+  background:linear-gradient(90deg, rgba(30,136,229,.07) 0%, transparent 60%);
+}
+.panel-head h2{
+  font-family:var(--f-display);
+  font-size:13.5px;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--steel);
+  margin:0;
+}
+.panel-head .count{
+  font-family:var(--f-mono);
+  font-size:11.5px;
+  color:var(--ink-dim);
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:var(--white);
+  border-radius:5px;
+  padding:7px 13px;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--navy);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:background .12s, border-color .12s;
+}
+.btn:hover{background:var(--paper-dim);}
+.btn-primary{
+  background:var(--navy);
+  border-color:var(--navy);
+  color:var(--white);
+}
+.btn-primary:hover{background:var(--navy-soft);}
+.btn-sm{padding:4px 9px;font-size:11.5px;}
+.btn-icon{
+  width:28px;height:28px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:5px;border:1px solid var(--line);background:var(--white);
+}
+.btn-icon:hover{background:var(--paper-dim);}
+.btn-icon svg{width:14px;height:14px;}
+.btn-danger-ghost{color:var(--brick);border-color:var(--brick-soft);}
+.btn-danger-ghost:hover{background:var(--brick-soft);}
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  font-size:10.5px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:20px;
+  letter-spacing:.02em;
+}
+.tag-am{background:var(--steel-soft);color:var(--steel);}
+.tag-pm{background:var(--umber-soft);color:var(--umber);}
+.tag-coord{background:#EDE6F5;color:#6B4E96;}
+
+input[type=text], input[type=date], input[type=number], input[type=email], textarea, select{
+  border:1px solid var(--line);
+  border-radius:5px;
+  padding:7px 10px;
+  font-size:12.5px;
+  color:var(--ink);
+  background:var(--white);
+  width:100%;
+}
+textarea{resize:vertical;font-family:var(--f-body);}
+input::placeholder, textarea::placeholder{color:#A8A296;}
+
+.scroll-x{overflow-x:auto;}
+.scroll-x::-webkit-scrollbar{height:10px;}
+.scroll-x::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+.scroll-x::-webkit-scrollbar-track{background:var(--paper-dim);}
+
+.empty-state{
+  padding:30px 18px;
+  text-align:center;
+  color:var(--ink-dim);
+  font-size:12.5px;
+}
+
+/* toast */
+.toast{
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--navy);
+  color:var(--white);
+  font-size:12.5px;
+  font-weight:500;
+  padding:10px 18px;
+  border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s, transform .18s;
+  z-index:999;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast .dot{width:7px;height:7px;border-radius:50%;background:var(--sage);flex:0 0 7px;}
+
+/* modal */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(28,34,48,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--white);
+  border-radius:8px;
+  width:100%;
+  max-width:380px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-head{
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.modal-head h3{margin:0;font-family:var(--f-display);font-size:14.5px;font-weight:700;}
+.modal-body{padding:16px 18px;}
+.modal-body p{font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.5;}
+.modal-foot{
+  padding:14px 18px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+.field{margin-bottom:12px;}
+.field label{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--ink-dim);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:5px;
+}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+
+h1,h2,h3{font-family:var(--f-display);}
+
+/* ===================== LOGIN ===================== */
+#loginScreen{
+  position:fixed; inset:0; background:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  z-index:200;
+}
+#loginScreen.hidden{display:none;}
+.login-card{
+  background:var(--paper); border-radius:10px; width:100%; max-width:340px;
+  padding:32px 28px; box-shadow:0 24px 70px rgba(0,0,0,.4);
+}
+.login-brand{
+  font-family:var(--f-display); font-weight:800; font-size:13px;
+  letter-spacing:.1em; color:var(--amber); text-align:center; margin-bottom:4px;
+}
+.login-title{ text-align:center; font-size:14px; color:var(--ink-dim); margin-bottom:24px; }
+.login-card .field{ margin-bottom:14px; }
+.login-card label{ display:block; font-size:11px; font-weight:600; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px; }
+.login-card input{ width:100%; padding:10px 12px; font-size:13.5px; }
+#loginError{
+  background:var(--brick-soft); color:var(--brick); font-size:12px; padding:8px 11px;
+  border-radius:5px; margin-bottom:12px; display:none;
+}
+#loginError.show{ display:block; }
+.login-card button[type=submit]{ width:100%; padding:10px; font-size:13px; margin-top:4px; }
+.login-loading{ text-align:center; font-size:12px; color:var(--ink-dim); margin-top:10px; display:none; }
+.login-loading.show{ display:block; }
+
+/* indicador de sync / usuario en topbar */
+.topbar-user{ display:flex; align-items:center; gap:14px; }
+.topbar-user .who{ font-size:12px; color:var(--ink-dim); }
+.topbar-user .who strong{ color:var(--ink); }
+#btnLogout{ font-size:11.5px; padding:6px 11px; }
+#syncStatus{ font-size:10.5px; color:var(--ink-dim); display:flex; align-items:center; gap:5px; }
+#syncStatus .sync-dot{ width:6px; height:6px; border-radius:50%; background:var(--sage); }
+#syncStatus.syncing .sync-dot{ background:var(--amber); }
+
+.solo-lectura-banner{
+  background:var(--umber-soft); color:var(--umber); border:1px solid #D5D9EC;
+  border-radius:7px; padding:9px 14px; font-size:12px; font-weight:600;
+  margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+.solo-lectura-banner::before{ content:'🔒'; font-size:12px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">CONTROL PERSONAL</div>
+    <div class="login-title">Ingresá tu usuario para continuar</div>
+    <div id="loginError"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" id="loginUser" autocomplete="username" placeholder="Ej: admin" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Ingresar</button>
+      <div class="login-loading" id="loginLoading">Verificando credenciales...</div>
+    </form>
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <!-- ===================== SIDEBAR RAIL ===================== -->
+  <nav class="rail">
+    <div class="rail-tabs" id="railTabs">
+      <button class="rail-tab" data-view="hoy">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><line x1="12" y1="12" x2="12" y2="7.5" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="12" x2="15.5" y2="14" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+        Día de hoy
+      </button>
+      <button class="rail-tab" data-view="calendario">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="3" stroke-width="1.5"/><path d="M3 10h18" stroke-width="1.5"/><line x1="8" y1="3" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="3" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/><rect x="7" y="13" width="2.5" height="2.5" rx=".5" fill="currentColor" stroke="none"/><rect x="10.75" y="13" width="2.5" height="2.5" rx=".5" fill="currentColor" stroke="none"/><rect x="14.5" y="13" width="2.5" height="2.5" rx=".5" fill="currentColor" stroke="none"/></svg>
+        Calendario
+      </button>
+      <button class="rail-tab" data-view="vacaciones">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" stroke-width="1.5"/><line x1="12" y1="3" x2="12" y2="5.5" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18.5" x2="12" y2="21" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="5.5" y2="12" stroke-width="2" stroke-linecap="round"/><line x1="18.5" y1="12" x2="21" y2="12" stroke-width="2" stroke-linecap="round"/><line x1="5.6" y1="5.6" x2="7.4" y2="7.4" stroke-width="2" stroke-linecap="round"/><line x1="16.6" y1="16.6" x2="18.4" y2="18.4" stroke-width="2" stroke-linecap="round"/><line x1="18.4" y1="5.6" x2="16.6" y2="7.4" stroke-width="2" stroke-linecap="round"/><line x1="7.4" y1="16.6" x2="5.6" y2="18.4" stroke-width="2" stroke-linecap="round"/></svg>
+        Vacaciones
+      </button>
+      <button class="rail-tab" data-view="compensatorios">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8.5 12.5l2.5 2.5 4.5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Compensatorios
+      </button>
+      <button class="rail-tab" data-view="anotaciones">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v13H8.5L4 21V4z" rx="2" stroke-width="1.5" stroke-linejoin="round"/><line x1="8" y1="9" x2="16" y2="9" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12.5" x2="13" y2="12.5" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Anotaciones
+      </button>
+      <button class="rail-tab" data-view="base">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.5" stroke-width="1.5"/><path d="M4 5.5v13c0 1.38 3.58 2.5 8 2.5s8-1.12 8-2.5v-13" stroke-width="1.5"/><path d="M4 11c0 1.38 3.58 2.5 8 2.5S20 12.38 20 11" stroke-width="1.5"/></svg>
+        Base de<br>operadores
+      </button>
+      <button class="rail-tab" data-view="historial">
+        <svg viewBox="0 0 24 24"><path d="M4 20h16" stroke-width="1.5" stroke-linecap="round"/><path d="M4 20V4" stroke-width="1.5" stroke-linecap="round"/><polyline points="7,15 11,10 14,13 19,7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16,7 19,7 19,10" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Historial<br>de eventos
+      </button>
+      <button class="rail-tab" data-view="usuarios">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.5" stroke-width="1.5"/><path d="M2 19.5c0-3.5 3.1-5.5 7-5.5s7 2 7 5.5" stroke-width="1.5" stroke-linecap="round"/><circle cx="18" cy="8" r="2.5" stroke-width="1.5"/><path d="M16.5 14c2.5.5 4.5 2 4.5 5" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Usuarios
+      </button>
+    </div>
+    <div class="rail-foot">v1.0</div>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="topbarTitle">Día de hoy</h1>
+        <div class="sub" id="topbarSub">Asistencia y novedades de la jornada</div>
+      </div>
+      <div class="topbar-user">
+        <div id="syncStatus"><span class="sync-dot"></span><span>Sincronizado</span></div>
+        <div class="topbar-date" id="topbarDate"></div>
+        <div class="who">Conectado: <strong id="whoUser">—</strong></div>
+        <button class="btn btn-sm" id="btnCambiarPass">Mi contraseña</button>
+        <button class="btn btn-sm" id="btnLogout">Salir</button>
+      </div>
+    </div>
+
+    <!-- VIEWS -->
+    <div class="view" id="view-hoy"></div>
+    <div class="view view-hidden" id="view-calendario"></div>
+    <div class="view view-hidden" id="view-vacaciones"></div>
+    <div class="view view-hidden" id="view-compensatorios"></div>
+    <div class="view view-hidden" id="view-anotaciones"></div>
+    <div class="view view-hidden" id="view-base"></div>
+    <div class="view view-hidden" id="view-historial"></div>
+    <div class="view view-hidden" id="view-usuarios"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<!-- Firebase SDK (compat — funciona con <script> simple, sin npm/bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+/* =======================================================================
+   data.js
+   -----------------------------------------------------------------------
+   Modelo de datos en memoria. Esta forma de objetos es la que se debería
+   respetar 1 a 1 al migrar a Firestore:
+
+   - DB.operadores   -> colección "operadores"      (doc id = operador.id)
+   - DB.eventos      -> colección "eventos"          (doc id = evento.id)
+   - DB.compensatorios -> colección "compensatorios" (doc id = comp.id)
+   - DB.vacacionesCreditos -> colección "vacacionesCreditos" (doc id = credito.id)
+   - DB.asistenciaHoy -> colección "asistencia" (doc id = `${operadorId}_${fecha}`)
+   - DB.anotaciones   -> colección "anotaciones"     (doc id = anot.id)
+   - DB.notasGenerales -> doc único "notasGenerales/actual"
+   ======================================================================= */
+
+/* =======================================================================
+   firebase.js — conexión real a Firebase (Auth + Firestore)
+   -----------------------------------------------------------------------
+   DB sigue siendo el mismo objeto en memoria que usan las 5 vistas
+   (DB.operadores, DB.eventos, etc.) — lo que cambia es que ahora se llena
+   en vivo desde Firestore (onSnapshot) y, cada vez que Bus.emit() corre
+   (ya disparado por las vistas tras cada cambio), se sincroniza de vuelta
+   hacia las colecciones correspondientes.
+   ======================================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDpxzMb0aJ0VjuDDuJpjto5hrq9UP-hJfM",
+  authDomain: "asistente-rrhh-9f425.firebaseapp.com",
+  projectId: "asistente-rrhh-9f425",
+  storageBucket: "asistente-rrhh-9f425.firebasestorage.app",
+  messagingSenderId: "844224699626",
+  appId: "1:844224699626:web:6434fc06e4cdeb1bda8b93"
+};
+
+firebase.initializeApp(firebaseConfig);
+const fbAuth = firebase.auth();
+const fbDb = firebase.firestore();
+
+/* Segunda instancia de Firebase, usada SOLO para crear usuarios nuevos.
+   Por qué: createUserWithEmailAndPassword loguea automáticamente al usuario
+   recién creado en la instancia donde se ejecuta. Si usáramos fbAuth (la
+   instancia principal), crear un usuario nuevo deslogearía al admin actual.
+   Con una segunda app aislada, el admin nunca pierde su sesión. */
+const fbSecondaryApp = firebase.initializeApp(firebaseConfig, "secondary");
+const fbAuthSecondary = fbSecondaryApp.auth();
+
+/* Dominio falso para simular "usuario" en vez de email real.
+   Tu compañero ingresa solo el nombre de usuario (ej: "admin") y
+   acá se lo convierte en un email interno para Firebase Auth. */
+const AUTH_EMAIL_DOMAIN = "rrhh.local";
+
+const COLECCIONES = ["operadores", "eventos", "vacacionesCreditos", "compensatorios", "anotaciones", "gruposCompensatorios"];
+
+const DB = {
+  operadores: [],
+  sectores: ["Pruebas", "Estetica", "Guardado", "Ochava", "Coordinacion", "Informatica", "Movimientos", "Redes"],
+  eventos: [],
+  vacacionesCreditos: [],
+  // Créditos individuales de compensatorio.
+  // Modelo: { id, operadorId, fechaOrigen: 'YYYY-MM-DD'|'', origenTipo: 'grupal'|'individual', grupoId?: string }
+  compensatorios: [],
+  // Grupos de asignación grupal por fecha.
+  // Modelo: { id, fecha: 'YYYY-MM-DD', operadores: [{operadorId, horarioDesde, horarioHasta}], confirmado: bool }
+  gruposCompensatorios: [],
+  asistenciaHoy: {},
+  operadoresEnAnotaciones: [],
+  anotaciones: [],
+  notasGenerales: "",
+  historialOcultos: [],
+  usuarios: [],
+};
+
+/* fecha "hoy" real del sistema (YYYY-MM-DD) */
+function calcularHoy(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+const HOY = calcularHoy();
+
+/* ---------------- snapshots: Firestore -> DB (lectura en vivo) ---------------- */
+let _unsubscribers = [];
+let _suppressNextSave = {}; // evita loops de re-guardado al recibir snapshot propio
+
+function iniciarSincronizacion(){
+  detenerSincronizacion();
+
+  COLECCIONES.forEach(col=>{
+    const unsub = fbDb.collection(col).onSnapshot(snap=>{
+      DB[col] = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+      Bus.render && Bus.render();
+    }, err=>{
+      console.error(`Error sincronizando ${col}:`, err);
+      Toast.show(`Error de conexión leyendo "${col}"`);
+    });
+    _unsubscribers.push(unsub);
+  });
+
+  // documentos singleton: config (operadoresEnAnotaciones, notasGenerales, asistenciaHoy)
+  const unsubConfig = fbDb.collection("config").doc("general").onSnapshot(doc=>{
+    if(doc.exists){
+      const data = doc.data();
+      DB.operadoresEnAnotaciones = data.operadoresEnAnotaciones || [];
+      DB.notasGenerales = data.notasGenerales || "";
+      DB.asistenciaHoy = data.asistenciaHoy || {};
+      DB.historialOcultos = data.historialOcultos || [];
+    }
+    Bus.render && Bus.render();
+  }, err=>{
+    console.error("Error sincronizando config:", err);
+  });
+  _unsubscribers.push(unsubConfig);
+
+  // colección "usuarios" — independiente del guardado masivo genérico (ver guardarTodoEnFirestore).
+  // Se gestiona con sus propias funciones (crearUsuario / borrarUsuario) para que ninguna otra
+  // mutación de la app la toque por accidente.
+  const unsubUsuarios = fbDb.collection("usuarios").onSnapshot(snap=>{
+    DB.usuarios = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    actualizarRolActual();
+    Bus.render && Bus.render();
+  }, err=>{
+    console.error("Error sincronizando usuarios:", err);
+  });
+  _unsubscribers.push(unsubUsuarios);
+}
+
+function detenerSincronizacion(){
+  _unsubscribers.forEach(u=> u());
+  _unsubscribers = [];
+}
+
+/* =======================================================================
+   roles.js — sistema de permisos (admin / total / parcial)
+   -----------------------------------------------------------------------
+   RolActual se actualiza cada vez que cambia la sesión o llega un snapshot
+   de la colección "usuarios". El usuario semilla (admin1, creado a mano en
+   Firebase Auth) no tiene documento en "usuarios" — si no se encuentra
+   coincidencia, se asume rol 'admin' (esto preserva tu acceso actual sin
+   que tengas que crear tu propio documento manualmente).
+   ======================================================================= */
+
+let RolActual = 'admin';
+
+function actualizarRolActual(){
+  const user = fbAuth.currentUser;
+  if(!user){ RolActual = 'admin'; return; }
+  const emailUsuario = user.email.replace('@'+AUTH_EMAIL_DOMAIN, '');
+  const registro = DB.usuarios.find(u=> u.usuario === emailUsuario);
+  RolActual = registro ? registro.rol : 'admin';
+}
+
+function puedeEditar(vista){
+  if(RolActual === 'admin' || RolActual === 'total') return true;
+  // permiso parcial: solo puede editar Día de hoy
+  return vista === 'hoy';
+}
+
+/* ---------------- Gestión de usuarios (solo accesible para rol admin) ---------------- */
+
+async function crearUsuario(usuario, password, rol){
+  const email = usuarioToEmail(usuario);
+  try{
+    const cred = await fbAuthSecondary.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
+    await fbDb.collection("usuarios").doc(uid).set({ usuario: usuario.trim().toLowerCase().replace(/\s+/g,''), rol });
+    await fbAuthSecondary.signOut(); // cierra la sesión de la instancia secundaria (no afecta al admin)
+    return { ok:true };
+  }catch(err){
+    let msg = 'No se pudo crear el usuario.';
+    if(err.code === 'auth/email-already-in-use') msg = 'Ese nombre de usuario ya existe.';
+    if(err.code === 'auth/weak-password') msg = 'La contraseña debe tener al menos 6 caracteres.';
+    return { ok:false, msg };
+  }
+}
+
+async function borrarUsuario(usuarioId){
+  // Nota: esto borra el documento de rol en Firestore. La cuenta de Firebase Auth
+  // en sí (email/password) no se puede borrar desde el cliente sin Admin SDK —
+  // queda inutilizada en la práctica porque ya no tiene rol asignado y, si hace
+  // falta liberarla del todo, se puede borrar manualmente desde la consola de Firebase.
+  await fbDb.collection("usuarios").doc(usuarioId).delete();
+}
+
+async function cambiarMiPassword(passwordActual, passwordNueva){
+  const user = fbAuth.currentUser;
+  if(!user) return { ok:false, msg:'No hay sesión activa.' };
+  try{
+    const cred = firebase.auth.EmailAuthProvider.credential(user.email, passwordActual);
+    await user.reauthenticateWithCredential(cred);
+    await user.updatePassword(passwordNueva);
+    return { ok:true };
+  }catch(err){
+    let msg = 'No se pudo cambiar la contraseña.';
+    if(err.code === 'auth/wrong-password') msg = 'La contraseña actual es incorrecta.';
+    if(err.code === 'auth/weak-password') msg = 'La contraseña nueva debe tener al menos 6 caracteres.';
+    return { ok:false, msg };
+  }
+}
+
+/* ---------------- DB -> Firestore (escritura) ----------------
+   Estrategia: cada colección se reescribe completa (batch) cada vez que
+   cambia. Para esta escala de datos (decenas de operarios/eventos) es
+   simple, segura y evita tener que cablear un método distinto por cada
+   tipo de mutación en las 5 vistas. */
+let _guardando = false;
+async function guardarTodoEnFirestore(){
+  if(_guardando) return;
+  _guardando = true;
+  document.getElementById('syncStatus')?.classList.add('syncing');
+  try{
+    for(const col of COLECCIONES){
+      const batch = fbDb.batch();
+      const snap = await fbDb.collection(col).get();
+      // borra lo que ya no está en memoria
+      snap.docs.forEach(docSnap=>{
+        if(!DB[col].find(item=> item.id === docSnap.id)){
+          batch.delete(docSnap.ref);
+        }
+      });
+      // upsert de lo que sí está
+      DB[col].forEach(item=>{
+        const { id, ...rest } = item;
+        batch.set(fbDb.collection(col).doc(id), rest);
+      });
+      await batch.commit();
+    }
+    await fbDb.collection("config").doc("general").set({
+      operadoresEnAnotaciones: DB.operadoresEnAnotaciones,
+      notasGenerales: DB.notasGenerales,
+      asistenciaHoy: DB.asistenciaHoy,
+      historialOcultos: DB.historialOcultos,
+    });
+  }catch(err){
+    console.error("Error guardando en Firestore:", err);
+    Toast.show("No se pudo guardar — revisá tu conexión");
+  }finally{
+    _guardando = false;
+    document.getElementById('syncStatus')?.classList.remove('syncing');
+  }
+}
+
+
+/* =======================================================================
+   app.js — núcleo: router, helpers, toast, modal, bus de eventos
+   ======================================================================= */
+
+/* ---------------- BUS DE EVENTOS ----------------
+   Las distintas vistas se suscriben a "db:changed" para re-renderizarse
+   cuando otra pestaña modifica datos compartidos (ej: Pestaña 4 marca
+   ausente -> Pestaña 2 debe repintar la celda de hoy). */
+const Bus = {
+  listeners: [],
+  on(fn){ this.listeners.push(fn); },
+  render(){ this.listeners.forEach(fn => fn()); },
+  emit(){
+    // 1) re-renderiza inmediatamente con el estado local (UI optimista)
+    this.render();
+    // 2) persiste el nuevo estado en Firestore
+    guardarTodoEnFirestore();
+  },
+};
+
+/* ---------------- HELPERS DE FECHA ---------------- */
+const DateUtil = {
+  parse(iso){ // 'YYYY-MM-DD' -> Date (local, sin desfasaje horario)
+    const [y,m,d] = iso.split('-').map(Number);
+    return new Date(y, m-1, d);
+  },
+  toISO(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  },
+  addDays(iso, n){
+    const d = this.parse(iso);
+    d.setDate(d.getDate()+n);
+    return this.toISO(d);
+  },
+  diffDays(isoA, isoB){ // isoB - isoA en días
+    const a = this.parse(isoA), b = this.parse(isoB);
+    return Math.round((b-a) / 86400000);
+  },
+  formatShort(iso){ // '2026-06-23' -> '23/6/26'
+    const [y,m,d] = iso.split('-');
+    return `${parseInt(d)}/${parseInt(m)}/${y.slice(2)}`;
+  },
+  formatDDMM(iso){
+    const [y,m,d] = iso.split('-');
+    return `${parseInt(d)}-${parseInt(m)}`;
+  },
+  formatLong(iso){
+    const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const d = this.parse(iso);
+    return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+  },
+  daysInMonth(year, monthIndex){ // monthIndex 0-11
+    return new Date(year, monthIndex+1, 0).getDate();
+  },
+  calcAntiguedad(fechaIngresoISO){
+    if(!fechaIngresoISO) return '—';
+    const ing = this.parse(fechaIngresoISO);
+    const hoy = this.parse(HOY);
+    let anios = hoy.getFullYear() - ing.getFullYear();
+    const cumpleEsteAnio = new Date(hoy.getFullYear(), ing.getMonth(), ing.getDate());
+    if(hoy < cumpleEsteAnio) anios--;
+    if(anios < 0) anios = 0;
+    return anios === 1 ? '1 año' : `${anios} años`;
+  }
+};
+
+/* ---------------- TOAST ---------------- */
+const Toast = {
+  el: null, msgEl: null, timer: null,
+  init(){ this.el = document.getElementById('toast'); this.msgEl = document.getElementById('toastMsg'); },
+  show(msg){
+    this.msgEl.textContent = msg;
+    this.el.classList.add('show');
+    clearTimeout(this.timer);
+    this.timer = setTimeout(()=> this.el.classList.remove('show'), 2600);
+  }
+};
+
+/* ---------------- MODAL GENÉRICO ----------------
+   Modal.open({ title, bodyHTML, confirmText, onConfirm, onMount }) */
+const Modal = {
+  overlay: null,
+  ensure(){
+    if(this.overlay) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'modal-overlay';
+    wrap.innerHTML = `
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="modalTitle"></h3>
+          <button class="btn-icon" id="modalClose" aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot">
+          <button class="btn" id="modalCancel">Cancelar</button>
+          <button class="btn btn-primary" id="modalConfirm">Confirmar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    this.overlay = wrap;
+    wrap.addEventListener('click', (e)=>{ if(e.target === wrap) this.close(); });
+    wrap.querySelector('#modalClose').addEventListener('click', ()=> this.close());
+    wrap.querySelector('#modalCancel').addEventListener('click', ()=> this.close());
+  },
+  open({ title, bodyHTML, confirmText='Confirmar', onConfirm, onMount, onClose }){
+    this.ensure();
+    this._onClose = onClose || null;
+    this._confirmed = false;
+    this.overlay.querySelector('#modalTitle').textContent = title;
+    this.overlay.querySelector('#modalBody').innerHTML = bodyHTML;
+    const confirmBtn = this.overlay.querySelector('#modalConfirm');
+    confirmBtn.textContent = confirmText;
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.replaceWith(newBtn);
+    newBtn.addEventListener('click', ()=>{
+      const result = onConfirm ? onConfirm(this.overlay.querySelector('#modalBody')) : true;
+      if(result !== false){ this._confirmed = true; this.close(); }
+    });
+    this.overlay.classList.add('open');
+    if(onMount) onMount(this.overlay.querySelector('#modalBody'));
+  },
+  close(){
+    if(this.overlay) this.overlay.classList.remove('open');
+    if(!this._confirmed && this._onClose) this._onClose();
+    this._onClose = null;
+  }
+};
+
+/* ---------------- ROUTER ---------------- */
+const Router = {
+  current: 'hoy',
+  titles: {
+    hoy:         { title:'Día de hoy', sub:'Asistencia y novedades de la jornada' },
+    calendario:  { title:'Calendario de eventos', sub:'Vacaciones, licencias, francos y cambios de turno' },
+    vacaciones:  { title:'Vacaciones', sub:'Asignación de créditos y vacaciones del mes' },
+    compensatorios: { title:'Compensatorios', sub:'Carga y gestión de días a favor' },
+    anotaciones: { title:'Anotaciones y solicitudes', sub:'Novedades por operario y notas generales' },
+    base:        { title:'Base de operadores', sub:'Información personal y operativa — fuente de verdad' },
+    historial:   { title:'Historial de eventos', sub:'Registros pasados de vacaciones, francos, ausencias y licencias' },
+    usuarios:    { title:'Usuarios', sub:'Gestión de accesos y permisos' },
+  },
+  renderers: {}, // se completan en cada view-*.js
+
+  init(){
+    Toast.init();
+    document.getElementById('topbarDate').textContent = DateUtil.formatLong(HOY);
+    document.querySelectorAll('.rail-tab').forEach(btn=>{
+      btn.addEventListener('click', ()=> this.go(btn.dataset.view));
+    });
+    Bus.on(()=> this.renderCurrent());
+    this.go('hoy');
+  },
+
+  go(viewName){
+    this.current = viewName;
+    document.querySelectorAll('.rail-tab').forEach(b=> b.classList.toggle('active', b.dataset.view === viewName));
+    document.querySelectorAll('.view').forEach(v=> v.classList.add('view-hidden'));
+    document.getElementById(`view-${viewName}`).classList.remove('view-hidden');
+    document.getElementById('topbarTitle').textContent = this.titles[viewName].title;
+    document.getElementById('topbarSub').textContent = this.titles[viewName].sub;
+    this.renderCurrent();
+  },
+
+  renderCurrent(){
+    this.aplicarVisibilidadPestañas();
+    const fn = this.renderers[this.current];
+    if(fn) fn();
+    this.aplicarSoloLectura();
+  },
+
+  // Oculta del menú lateral la pestaña "Usuarios" para quien no sea admin
+  aplicarVisibilidadPestañas(){
+    const tabUsuarios = document.querySelector('.rail-tab[data-view="usuarios"]');
+    if(tabUsuarios) tabUsuarios.style.display = (RolActual === 'admin') ? '' : 'none';
+  },
+
+  // Para permiso parcial: deja todo visible pero deshabilita controles de edición
+  // en cualquier vista que no sea "hoy". No toca Firestore — es un bloqueo de interfaz.
+  aplicarSoloLectura(){
+    if(puedeEditar(this.current)) return;
+    const viewEl = document.getElementById(`view-${this.current}`);
+    if(!viewEl) return;
+    viewEl.querySelectorAll('input, select, textarea, button').forEach(el=>{
+      // no deshabilitar elementos de navegación/ordenamiento que no escriben datos
+      if(el.id === 'hoyOrdenSel' || el.id === 'baseOrdenSel') return;
+      el.disabled = true;
+    });
+    if(!viewEl.querySelector('.solo-lectura-banner')){
+      const banner = document.createElement('div');
+      banner.className = 'solo-lectura-banner';
+      banner.textContent = 'Modo solo lectura — tu usuario no tiene permiso para editar esta sección';
+      viewEl.prepend(banner);
+    }
+  }
+};
+
+/* ---------------- HELPERS DE DOMINIO COMPARTIDOS ---------------- */
+const Domain = {
+  getOperador(id){ return DB.operadores.find(o=> o.id === id); },
+
+  eventosDeFecha(operadorId, fecha){
+    return DB.eventos.filter(e=> e.operadorId === operadorId && e.fecha === fecha);
+  },
+
+  // Evento "bloqueante" de una fecha puntual (vacaciones/licencia/ausente) — el primero que matchee
+  eventoBloqueante(operadorId, fecha){
+    return DB.eventos.find(e=> e.operadorId===operadorId && e.fecha===fecha &&
+      (e.tipo==='vacaciones' || e.tipo==='licencia' || e.tipo==='ausente'));
+  },
+
+  // Devuelve { tipo, hasta } del bloque consecutivo de un tipo que contiene `fecha`
+  bloqueConsecutivo(operadorId, fecha, tipo){
+    const fechasDelTipo = new Set(
+      DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo===tipo).map(e=> e.fecha)
+    );
+    if(!fechasDelTipo.has(fecha)) return null;
+    let hasta = fecha;
+    while(fechasDelTipo.has(DateUtil.addDays(hasta,1))){
+      hasta = DateUtil.addDays(hasta,1);
+    }
+    let desde = fecha;
+    while(fechasDelTipo.has(DateUtil.addDays(desde,-1))){
+      desde = DateUtil.addDays(desde,-1);
+    }
+    return { tipo, desde, hasta };
+  },
+
+  // ============================================================
+  // HELPERS DE PERÍODO (formato "AAAA/AAAA+1")
+  // Compatibilidad: si el lote tiene {anio} en vez de {periodo}, lo convierte automáticamente.
+  // ============================================================
+
+  // Convierte un número de año al string de período: 2025 → "2025/2026"
+  anioToPeriodo(anio){ return `${anio}/${anio+1}`; },
+
+  // Devuelve el período de un lote, leyendo {periodo} o convirtiendo {anio} si existe
+  loteGetPeriodo(lote){
+    if(lote.periodo) return lote.periodo;
+    if(lote.anio) return this.anioToPeriodo(lote.anio);
+    return '?';
+  },
+
+  // Ordena períodos correctamente: "2024/2025" < "2025/2026" (comparación de strings funciona)
+  ordenarPeriodos(a, b){ return this.loteGetPeriodo(a).localeCompare(this.loteGetPeriodo(b)); },
+
+  // Saldo de vacaciones REALMENTE disponibles para asignar:
+  // = créditos totales - días pasados (ya disfrutados) - días futuros ya asignados en calendario.
+  // Esto refleja correctamente cuántos días quedan libres para asignar.
+  saldoVacaciones(operadorId){
+    const cargado = DB.vacacionesCreditos
+      .filter(v=> v.operadorId===operadorId)
+      .reduce((sum,v)=> sum+v.dias, 0);
+    const usados = DB.eventos.filter(e=>
+      e.operadorId===operadorId && e.tipo==='vacaciones'
+    ).length; // tanto pasados como futuros ya ocupan el crédito
+    return cargado - usados;
+  },
+
+  // Días asignados en el calendario que todavía NO pasaron (futuros = pendientes)
+  vacacionesPendientesFuturas(operadorId){
+    return DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo==='vacaciones' && e.fecha > HOY).length;
+  },
+
+  // Días asignados en el calendario que YA pasaron (ya disfrutados)
+  vacacionesPasadas(operadorId){
+    return DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo==='vacaciones' && e.fecha <= HOY).length;
+  },
+
+  // Si el saldo quedó negativo, borra vacaciones futuras empezando por las más nuevas
+  corregirSaldoNegativoVacaciones(operadorId){
+    let saldo = this.saldoVacaciones(operadorId);
+    if(saldo >= 0) return 0;
+    let borrados = 0;
+    const futuros = DB.eventos
+      .filter(e=> e.operadorId===operadorId && e.tipo==='vacaciones' && e.fecha > HOY)
+      .sort((a,b)=> b.fecha.localeCompare(a.fecha));
+    for(const ev of futuros){
+      if(saldo >= 0) break;
+      DB.eventos = DB.eventos.filter(e=> e.id !== ev.id);
+      saldo++;
+      borrados++;
+    }
+    return borrados;
+  },
+
+  // Lotes con saldo restante calculado por FIFO de período.
+  // Descuenta tanto días pasados como futuros asignados (ambos consumen crédito).
+  lotesVacacionesConSaldo(operadorId){
+    const lotes = DB.vacacionesCreditos
+      .filter(v=> v.operadorId===operadorId)
+      .sort((a,b)=> this.ordenarPeriodos(a,b));
+    let totalUsados = DB.eventos.filter(e=>
+      e.operadorId===operadorId && e.tipo==='vacaciones'
+    ).length; // pasados + futuros
+    return lotes.map(lote=>{
+      const consumido = Math.min(totalUsados, lote.dias);
+      const restante = lote.dias - consumido;
+      totalUsados -= consumido;
+      return { ...lote, periodo: this.loteGetPeriodo(lote), restante, agotado: restante===0 };
+    });
+  },
+
+  // Suma `dias` a un período específico de CADA operador (para el botón "Asignar a todos")
+  asignarCreditoATodos(dias, periodo){
+    let afectados = 0;
+    DB.operadores.forEach(op=>{
+      const lote = DB.vacacionesCreditos.find(v=> v.operadorId===op.id && this.loteGetPeriodo(v)===periodo);
+      if(lote){
+        lote.dias += dias;
+      } else {
+        DB.vacacionesCreditos.push({ id:'vc_'+Date.now()+'_'+op.id, operadorId:op.id, periodo, dias });
+      }
+      afectados++;
+    });
+    return afectados;
+  },
+
+
+  // Saldo de compensatorios disponibles (créditos cargados - francos ya tomados)
+  saldoFrancos(operadorId){
+    const cargados = DB.compensatorios.filter(c=> c.operadorId===operadorId).length;
+    const tomados = DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo==='franco').length;
+    return cargados - tomados;
+  },
+
+  // Créditos disponibles (FIFO: sin fecha primero, luego por fechaOrigen ascendente)
+  creditosCompensatorioDisponibles(operadorId){
+    const todos = DB.compensatorios
+      .filter(c=> c.operadorId===operadorId)
+      .sort((a,b)=>{
+        const fa = a.fechaOrigen || '';
+        const fb = b.fechaOrigen || '';
+        if(!fa && fb) return -1;
+        if(fa && !fb) return 1;
+        return fa.localeCompare(fb);
+      });
+    const tomados = DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo==='franco').length;
+    return todos.slice(tomados);
+  },
+
+  // Descuenta 1 día de vacaciones del lote más antiguo con saldo > 0. Devuelve true si pudo.
+  descontarVacacion(operadorId){
+    const lotes = DB.vacacionesCreditos
+      .filter(v=> v.operadorId===operadorId)
+      .sort((a,b)=> this.ordenarPeriodos(a,b));
+    let usados = DB.eventos.filter(e=> e.operadorId===operadorId && e.tipo==='vacaciones').length;
+    for(const lote of lotes){
+      if(usados < lote.dias){
+        return true;
+      }
+      usados -= lote.dias;
+    }
+    return false;
+  },
+
+  proximosEventos(){
+    // genera alertas: próximos a EMPEZAR vacaciones/licencia, y próximos a TERMINAR
+    const alerts = [];
+    const tipos = ['vacaciones','licencia'];
+    for(const tipo of tipos){
+      // agrupar eventos por operador en bloques consecutivos
+      const porOperador = {};
+      DB.eventos.filter(e=> e.tipo===tipo).forEach(e=>{
+        (porOperador[e.operadorId] ||= []).push(e.fecha);
+      });
+      Object.entries(porOperador).forEach(([opId, fechas])=>{
+        fechas = [...new Set(fechas)].sort();
+        // detectar bloques consecutivos
+        let bloque = [fechas[0]];
+        const bloques = [];
+        for(let i=1;i<fechas.length;i++){
+          if(DateUtil.diffDays(fechas[i-1], fechas[i]) === 1){
+            bloque.push(fechas[i]);
+          } else {
+            bloques.push(bloque); bloque=[fechas[i]];
+          }
+        }
+        bloques.push(bloque);
+        bloques.forEach(b=>{
+          const desde = b[0], hasta = b[b.length-1];
+          const op = Domain.getOperador(opId);
+          if(!op) return;
+          const diffInicio = DateUtil.diffDays(HOY, desde);
+          const diffFin = DateUtil.diffDays(HOY, hasta);
+          if(diffInicio > 0){
+            alerts.push({ dias: diffInicio, texto: `En ${diffInicio} día${diffInicio===1?'':'s'} empiezan ${tipo} de "${op.apellidoNombre}"` });
+          } else if(diffInicio <= 0 && diffFin >= 0){
+            if(diffFin > 0){
+              alerts.push({ dias: diffFin, texto: `En ${diffFin} día${diffFin===1?'':'s'} termina la ${tipo==='licencia'?'licencia':'vacaciones'} de "${op.apellidoNombre}"` });
+            }
+          }
+        });
+      });
+    }
+    alerts.sort((a,b)=> a.dias-b.dias);
+    return alerts;
+  },
+
+  // Vacaciones que arrancan en el mes calendario siguiente al actual (para el reporte mensual)
+  vacacionesDelProximoMes(){
+    const hoyDate = DateUtil.parse(HOY);
+    let mesObjetivo = hoyDate.getMonth() + 1;
+    let anioObjetivo = hoyDate.getFullYear();
+    if(mesObjetivo > 11){ mesObjetivo = 0; anioObjetivo++; }
+
+    const porOperador = {};
+    DB.eventos.filter(e=> e.tipo==='vacaciones').forEach(e=>{
+      (porOperador[e.operadorId] ||= []).push(e.fecha);
+    });
+
+    const resultado = [];
+    Object.entries(porOperador).forEach(([opId, fechas])=>{
+      fechas = [...new Set(fechas)].sort();
+      let bloque = [fechas[0]];
+      const bloques = [];
+      for(let i=1;i<fechas.length;i++){
+        if(DateUtil.diffDays(fechas[i-1], fechas[i]) === 1){
+          bloque.push(fechas[i]);
+        } else {
+          bloques.push(bloque); bloque=[fechas[i]];
+        }
+      }
+      bloques.push(bloque);
+      bloques.forEach(b=>{
+        const desde = b[0], hasta = b[b.length-1];
+        const dDesde = DateUtil.parse(desde);
+        if(dDesde.getMonth() === mesObjetivo && dDesde.getFullYear() === anioObjetivo){
+          const op = Domain.getOperador(opId);
+          if(!op) return;
+          resultado.push({ operador: op.apellidoNombre, desde, hasta, dias: b.length });
+        }
+      });
+    });
+    resultado.sort((a,b)=> a.desde.localeCompare(b.desde));
+    return resultado;
+  },
+
+  // ---------------- HISTORIAL DE EVENTOS ----------------
+
+  // Agrupa fechas consecutivas de un mismo tipo/operador en bloques {desde, hasta, dias}
+  _agruparBloques(fechas){
+    fechas = [...new Set(fechas)].sort();
+    if(fechas.length === 0) return [];
+    let bloque = [fechas[0]];
+    const bloques = [];
+    for(let i=1;i<fechas.length;i++){
+      if(DateUtil.diffDays(fechas[i-1], fechas[i]) === 1) bloque.push(fechas[i]);
+      else { bloques.push(bloque); bloque=[fechas[i]]; }
+    }
+    bloques.push(bloque);
+    return bloques.map(b=> ({ desde:b[0], hasta:b[b.length-1], dias:b.length }));
+  },
+
+  // Vacaciones cuyo bloque ya terminó (hasta < HOY), agrupadas por operario
+  historialVacaciones(){
+    const porOperador = {};
+    DB.eventos.filter(e=> e.tipo==='vacaciones' && !DB.historialOcultos.includes(e.id))
+      .forEach(e=> (porOperador[e.operadorId] ||= []).push(e.fecha));
+    const resultado = {};
+    Object.entries(porOperador).forEach(([opId, fechas])=>{
+      const bloques = this._agruparBloques(fechas).filter(b=> b.hasta < HOY);
+      if(bloques.length){
+        const ids = bloques.flatMap(b=> {
+          const idsDelBloque = [];
+          let cur = b.desde;
+          while(true){
+            const ev = DB.eventos.find(e=> e.operadorId===opId && e.fecha===cur && e.tipo==='vacaciones');
+            if(ev) idsDelBloque.push(ev.id);
+            if(cur === b.hasta) break;
+            cur = DateUtil.addDays(cur, 1);
+          }
+          return idsDelBloque;
+        });
+        resultado[opId] = { bloques, ids };
+      }
+    });
+    return resultado;
+  },
+
+  // Francos cuya fecha de goce ya pasó, agrupados por operario
+  historialFrancos(){
+    const porOperador = {};
+    DB.eventos.filter(e=> e.tipo==='franco' && e.fecha < HOY && !DB.historialOcultos.includes(e.id))
+      .forEach(e=> (porOperador[e.operadorId] ||= []).push(e));
+    return porOperador;
+  },
+
+  // Contador histórico de ausencias y licencias por operario, con detalle de fechas
+  historialAusenciasLicencias(){
+    const resultado = {};
+    DB.eventos.filter(e=> (e.tipo==='ausente' || e.tipo==='licencia') && e.fecha < HOY && !DB.historialOcultos.includes(e.id))
+      .forEach(e=>{
+        if(!resultado[e.operadorId]) resultado[e.operadorId] = { ausencias:[], licencias:[] };
+        if(e.tipo==='ausente') resultado[e.operadorId].ausencias.push(e);
+        else resultado[e.operadorId].licencias.push(e);
+      });
+    return resultado;
+  }
+};
+
+
+/* =======================================================================
+   view-base.js — PESTAÑA 1: Base info operadores (carga)
+   ======================================================================= */
+
+const ViewBase = {
+  orden: 'nombre', // nombre | sector | turno | legajo
+
+  render(){
+    const el = document.getElementById('view-base');
+    let ops = [...DB.operadores];
+
+    const comparadores = {
+      nombre: (a,b)=> a.apellidoNombre.localeCompare(b.apellidoNombre),
+      sector: (a,b)=> (a.sector||'').localeCompare(b.sector||'') || a.apellidoNombre.localeCompare(b.apellidoNombre),
+      turno: (a,b)=> (a.turno||'').localeCompare(b.turno||'') || a.apellidoNombre.localeCompare(b.apellidoNombre),
+      legajo: (a,b)=> (parseInt(a.legajo)||999999) - (parseInt(b.legajo)||999999),
+    };
+    ops.sort(comparadores[this.orden] || comparadores.nombre);
+
+    el.innerHTML = `
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Base info operadores</h2>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="count">${ops.length} operarios cargados</span>
+            <label class="orden-label">Ordenar por
+              <select id="baseOrdenSel" class="orden-select">
+                <option value="nombre" ${this.orden==='nombre'?'selected':''}>Nombre</option>
+                <option value="sector" ${this.orden==='sector'?'selected':''}>Sector</option>
+                <option value="turno" ${this.orden==='turno'?'selected':''}>Turno</option>
+                <option value="legajo" ${this.orden==='legajo'?'selected':''}>Legajo</option>
+              </select>
+            </label>
+            <button class="btn btn-sm" id="btnExportarExcel">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+              Exportar Excel
+            </button>
+            ${ops.length === 0 ? `
+            <button class="btn" id="btnImportarOperadores" style="border-color:var(--sage);color:var(--sage);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+              Importar lista inicial (37)
+            </button>` : ''}
+            <button class="btn btn-primary" id="btnNuevoOperador">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+              Nuevo operario
+            </button>
+          </div>
+        </div>
+        <div class="scroll-x">
+          <table class="base-table">
+            <thead>
+              <tr class="base-group-row">
+                <th colspan="7" class="grp-personal">Información personal</th>
+                <th colspan="3" class="grp-operativa">Información operativa</th>
+                <th></th>
+              </tr>
+              <tr>
+                <th style="min-width:230px;">Apellido y Nombre</th>
+                <th style="min-width:150px;">Dirección</th>
+                <th style="min-width:55px;">Legajo</th>
+                <th style="min-width:95px;">C.U.I.L.</th>
+                <th style="min-width:95px;">Fecha ing.</th>
+                <th style="min-width:75px;">Antigüedad</th>
+                <th style="min-width:100px;">Celular</th>
+                <th style="min-width:78px;">Turno</th>
+                <th style="min-width:100px;">Sector</th>
+                <th style="min-width:190px;">Correo empresarial</th>
+                <th style="min-width:36px;"></th>
+              </tr>
+            </thead>
+            <tbody id="baseTbody">
+              ${ops.map(op=> this.rowHTML(op)).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    if(!document.getElementById('baseTableStyles')){
+      const style = document.createElement('style');
+      style.id = 'baseTableStyles';
+      style.textContent = `
+        .base-table{ border-collapse:collapse; width:100%; font-size:10.6px; }
+        .base-table th, .base-table td{ border-bottom:1px solid var(--line); border-right:1px solid #EEEAE0; padding:6px 8px; text-align:left; white-space:nowrap; }
+        .base-table thead tr:last-child th{ background:var(--paper-dim); font-weight:600; font-size:9.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-dim); position:sticky; top:0; z-index:2; }
+        .base-group-row th{ position:sticky; top:0; z-index:3; font-family:var(--f-display); font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:7px 8px; }
+        .grp-personal{ background:var(--steel-soft); color:var(--steel); }
+        .grp-operativa{ background:var(--umber-soft); color:var(--umber); border-left:2px solid var(--umber); }
+        .base-table td.col-nombre{ position:sticky; left:0; background:var(--white); font-weight:600; z-index:1; }
+        .base-table tbody tr:hover td.col-nombre{ background:var(--paper-dim); }
+        .base-table tbody tr:hover td{ background:#FBFAF7; }
+        .base-table tbody tr:hover td.col-nombre{ background:var(--paper-dim); }
+        .base-table td input, .base-table td select{ border:1px solid transparent; background:transparent; padding:3px 5px; font-size:10.6px; width:100%; border-radius:4px; font-family:var(--f-mono); }
+        .base-table td input:hover, .base-table td select:hover{ border-color:var(--line); }
+        .base-table td input:focus, .base-table td select:focus{ border-color:var(--steel); background:var(--white); outline:none; }
+        .base-table td.col-nombre input{ font-family:var(--f-body); font-weight:600; }
+        .base-table td.col-antig{ font-family:var(--f-mono); color:var(--ink-dim); }
+        .base-table .row-delete{ opacity:.35; transition:opacity .12s; }
+        .base-table tr:hover .row-delete{ opacity:1; }
+
+        .turno-pill{ display:inline-flex; align-items:center; justify-content:center; width:100%; border-radius:5px; padding:3px 0; font-weight:700; font-size:10px; letter-spacing:.03em; }
+        .base-table td.turno-cell-am{ background:#EAF2EC; }
+        .base-table td.turno-cell-pm{ background:#FBEFE6; }
+        .base-table td.turno-cell-am select{ color:#3F6B4F; }
+        .base-table td.turno-cell-pm select{ color:#9C5A2E; }
+
+        .orden-label{ font-size:11px; color:var(--ink-dim); display:flex; align-items:center; gap:6px; }
+        .orden-select{ width:auto; padding:5px 8px; font-size:11.5px; }
+      `;
+      document.head.appendChild(style);
+    }
+
+    el.querySelectorAll('[data-field]').forEach(input=>{
+      input.addEventListener('change', (e)=> this.onFieldChange(e));
+    });
+    el.querySelectorAll('.row-delete').forEach(btn=>{
+      btn.addEventListener('click', (e)=> this.onDelete(e));
+    });
+    document.getElementById('btnNuevoOperador').addEventListener('click', ()=> this.onNuevo());
+    document.getElementById('btnExportarExcel').addEventListener('click', ()=> this.onExportar());
+    document.getElementById('baseOrdenSel').addEventListener('change', (e)=>{
+      this.orden = e.target.value;
+      this.render();
+    });
+    const btnImport = document.getElementById('btnImportarOperadores');
+    if(btnImport) btnImport.addEventListener('click', ()=> this.onImportar());
+  },
+
+  rowHTML(op){
+    const antig = DateUtil.calcAntiguedad(op.fechaIngreso);
+    const turnoClass = op.turno === 'PM' ? 'turno-cell-pm' : 'turno-cell-am';
+    return `
+      <tr data-id="${op.id}">
+        <td class="col-nombre"><input type="text" data-field="apellidoNombre" value="${this.esc(op.apellidoNombre)}" placeholder="Apellido, Nombre"></td>
+        <td><input type="text" data-field="direccion" value="${this.esc(op.direccion)}" placeholder="—"></td>
+        <td><input type="text" data-field="legajo" value="${this.esc(op.legajo)}" placeholder="—"></td>
+        <td><input type="text" data-field="cuil" value="${this.esc(op.cuil)}" placeholder="—"></td>
+        <td><input type="date" data-field="fechaIngreso" value="${op.fechaIngreso || ''}"></td>
+        <td class="col-antig">${antig}</td>
+        <td><input type="text" data-field="celular" value="${this.esc(op.celular)}" placeholder="—"></td>
+        <td class="${turnoClass}">
+          <select data-field="turno">
+            <option value="AM" ${op.turno==='AM'?'selected':''}>AM</option>
+            <option value="PM" ${op.turno==='PM'?'selected':''}>PM</option>
+          </select>
+        </td>
+        <td>
+          <select data-field="sector">
+            <option value="" ${!op.sector?'selected':''}>—</option>
+            ${DB.sectores.map(s=> `<option value="${s}" ${op.sector===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="text" data-field="correoEmpresarial" value="${this.esc(op.correoEmpresarial)}" placeholder="—"></td>
+        <td>
+          <button class="btn-icon row-delete" data-id="${op.id}" aria-label="Eliminar operario" title="Eliminar operario">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brick)" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  onFieldChange(e){
+    const tr = e.target.closest('tr');
+    const id = tr.dataset.id;
+    const field = e.target.dataset.field;
+    const op = Domain.getOperador(id);
+    if(!op) return;
+    op[field] = e.target.value;
+    Toast.show('Cambios guardados');
+    if(field === 'fechaIngreso'){
+      tr.querySelector('.col-antig').textContent = DateUtil.calcAntiguedad(op.fechaIngreso);
+    }
+    if(field === 'turno'){
+      tr.querySelector('select[data-field="turno"]').closest('td').className = op.turno === 'PM' ? 'turno-cell-pm' : 'turno-cell-am';
+      Bus.emit();
+    } else if(field === 'apellidoNombre'){
+      Bus.emit(); // afecta Calendario / Día de hoy
+    }
+  },
+
+  onDelete(e){
+    const id = e.currentTarget.dataset.id;
+    const op = Domain.getOperador(id);
+    if(!op) return;
+    Modal.open({
+      title:'Eliminar operario',
+      bodyHTML:`<p>Vas a eliminar a <strong>${this.esc(op.apellidoNombre)}</strong> de la base. Esta acción no se puede deshacer y también quitará sus eventos del calendario.</p>`,
+      confirmText:'Eliminar',
+      onConfirm:()=>{
+        DB.operadores = DB.operadores.filter(o=> o.id !== id);
+        DB.eventos = DB.eventos.filter(ev=> ev.operadorId !== id);
+        Toast.show('Operario eliminado');
+        Bus.emit();
+      }
+    });
+  },
+
+  onExportar(){
+    const ops = [...DB.operadores];
+    const comparadores = {
+      nombre: (a,b)=> a.apellidoNombre.localeCompare(b.apellidoNombre),
+      sector: (a,b)=> (a.sector||'').localeCompare(b.sector||'') || a.apellidoNombre.localeCompare(b.apellidoNombre),
+      turno: (a,b)=> (a.turno||'').localeCompare(b.turno||'') || a.apellidoNombre.localeCompare(b.apellidoNombre),
+      legajo: (a,b)=> (parseInt(a.legajo)||999999) - (parseInt(b.legajo)||999999),
+    };
+    ops.sort(comparadores[this.orden] || comparadores.nombre);
+
+    const filas = ops.map(op=> ({
+      'Apellido y Nombre': op.apellidoNombre,
+      'Dirección': op.direccion || '',
+      'Legajo': op.legajo || '',
+      'C.U.I.L.': op.cuil || '',
+      'Fecha ingreso': op.fechaIngreso || '',
+      'Antigüedad': DateUtil.calcAntiguedad(op.fechaIngreso),
+      'Celular': op.celular || '',
+      'Turno': op.turno || '',
+      'Sector': op.sector || '',
+      'Correo empresarial': op.correoEmpresarial || '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(filas);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Operadores');
+    XLSX.writeFile(wb, `base_operadores_${HOY}.xlsx`);
+    Toast.show('Excel exportado');
+  },
+
+  onImportar(){
+    // Importación inicial removida — los operarios se cargan desde Firestore.
+    // Para agregar operarios usá el botón "Nuevo operario" en esta pestaña.
+    Toast.show('Usá el botón "Nuevo operario" para agregar operarios manualmente');
+  },
+
+  onNuevo(){
+    const newId = 'op' + (Math.max(0, ...DB.operadores.map(o=> parseInt(o.id.replace('op',''))||0)) + 1);
+    DB.operadores.push({
+      id:newId, apellidoNombre:'NUEVO OPERARIO', direccion:'', legajo:'', cuil:'',
+      fechaIngreso:'', celular:'', turno:'AM', sector:'', correoEmpresarial:''
+    });
+    Toast.show('Operario agregado — completá sus datos');
+    Bus.emit();
+  }
+};
+
+Router.renderers.base = () => ViewBase.render();
+
+
+/* =======================================================================
+   view-calendario.js — PESTAÑA 2: Calendario de eventos
+   ======================================================================= */
+
+const ViewCalendario = {
+  mesActual: null,
+  seleccion: null,
+  dragging: false,
+  dragOperadorId: null,
+  dragStartFecha: null,
+  filtros: { AM: true, PM: true, COORD: true },
+
+  ESTILOS: {
+    vacaciones:      { bg:'var(--vacation-soft)',  fg:'#8A6520', label:(e)=> 'vacaciones' },
+    vacacionesPasadas:{ bg:'#EDE9E0',              fg:'#AAA090', label:(e)=> 'vacaciones ✓' },
+    licencia:        { bg:'var(--brick-soft)',  fg:'var(--brick)', label:(e)=> 'licencia' },
+    franco:          { bg:'var(--sage-soft)',   fg:'var(--sage)', label:(e)=> e.origenFranco ? `compensó (${DateUtil.formatDDMM(e.origenFranco)})` : 'compensatorio' },
+    cambioTurno:     { bg:'#2A3245',            fg:'#fff',         label:(e)=> e.turnoCambio === 'Nocturno' ? 'noche' : `cambio a ${e.turnoCambio}` },
+    ausente:         { bg:'var(--brick-soft)',  fg:'var(--brick)', label:(e)=> 'ausente' },
+    turnoCoord:      { bg:'#EDE6F5',            fg:'#6B4E96',      label:(e)=> e.turnoDia },
+  },
+
+  init(){
+    const hoyDate = DateUtil.parse(HOY);
+    this.mesActual = { year: hoyDate.getFullYear(), monthIndex: hoyDate.getMonth() };
+  },
+
+  render(){
+    if(!this.mesActual) this.init();
+    const el = document.getElementById('view-calendario');
+    const { year, monthIndex } = this.mesActual;
+    const nDays = DateUtil.daysInMonth(year, monthIndex);
+    const fechas = Array.from({length:nDays}, (_,i)=> {
+      const d = new Date(year, monthIndex, i+1);
+      return DateUtil.toISO(d);
+    });
+    const nombreMes = DateUtil.parse(fechas[0]).toLocaleDateString('es-AR', { month:'long', year:'numeric' });
+
+    const amOps = DB.operadores.filter(o=> o.turno === 'AM' && o.sector !== 'Coordinacion');
+    const pmOps = DB.operadores.filter(o=> o.turno === 'PM' && o.sector !== 'Coordinacion');
+    const coordOps = DB.operadores.filter(o=> o.sector === 'Coordinacion');
+
+    el.innerHTML = `
+      <div class="cal-toolbar">
+        <div class="cal-nav">
+          <button class="btn-icon" id="calPrev" aria-label="Mes anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="cal-mes-label">${this.cap(nombreMes)}</span>
+          <button class="btn-icon" id="calNext" aria-label="Mes siguiente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="cal-filtros">
+          <span class="cal-filtros-label">Ver:</span>
+          <label class="cal-chk-label"><input type="checkbox" id="filtroAM" ${this.filtros.AM?'checked':''}> AM — Mañana</label>
+          <label class="cal-chk-label"><input type="checkbox" id="filtroPM" ${this.filtros.PM?'checked':''}> PM — Tarde</label>
+          ${coordOps.length > 0 ? `<label class="cal-chk-label"><input type="checkbox" id="filtroCOORD" ${this.filtros.COORD?'checked':''}> Coordinadores</label>` : ''}
+        </div>
+        <div class="cal-legend">
+          <span class="leg-item"><i style="background:var(--vacation-soft);border:1px solid var(--vacation)"></i>Vacaciones</span>
+          <span class="leg-item"><i style="background:var(--brick-soft);border:1px solid var(--brick)"></i>Licencia</span>
+          <span class="leg-item"><i style="background:var(--sage-soft);border:1px solid var(--sage)"></i>Compensatorio</span>
+          <span class="leg-item"><i style="background:#2A3245"></i>Cambio de turno</span>
+        </div>
+      </div>
+
+      <div class="cal-bloques-wrapper">
+      <div class="cal-block" data-turno="AM" ${!this.filtros.AM?'style="display:none"':''}>
+        <div class="cal-block-head"><span class="tag tag-am">AM</span> Turno mañana</div>
+        <div class="scroll-x cal-scroll" id="calScrollAM">
+          ${this.gridHTML(amOps, fechas)}
+        </div>
+      </div>
+
+      <div class="cal-block" data-turno="PM" style="${!this.filtros.PM?'display:none':''}">
+        <div class="cal-block-head"><span class="tag tag-pm">PM</span> Turno tarde</div>
+        <div class="scroll-x cal-scroll" id="calScrollPM">
+          ${this.gridHTML(pmOps, fechas)}
+        </div>
+      </div>
+
+      ${coordOps.length > 0 ? `
+      <div class="cal-block" data-turno="COORD" style="${!this.filtros.COORD?'display:none':''}">
+        <div class="cal-block-head"><span class="tag tag-coord">COORD</span> Coordinadores</div>
+        <div class="scroll-x cal-scroll" id="calScrollCOORD">
+          ${this.gridHTML(coordOps, fechas)}
+        </div>
+      </div>` : ''}
+      </div>
+
+      <div class="cal-action-panel" id="calActionPanel" style="display:none;"></div>
+    `;
+
+    this.injectStyles();
+    this.bindToolbar();
+    this.bindGrid(el);
+    this.syncScroll();
+    this.scrollToHoy();
+  },
+
+  cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); },
+
+  gridHTML(ops, fechas){
+    const colWidth = 78;
+    return `
+      <table class="cal-table" style="--colw:${colWidth}px;">
+        <thead>
+          <tr class="cal-hoy-row">
+            <td class="cal-namecol"></td>
+            ${fechas.map(f=> `<td class="${f===HOY?'is-hoy-marker':''}">${f===HOY?'HOY':''}</td>`).join('')}
+          </tr>
+          <tr>
+            <td class="cal-namecol">Operario</td>
+            ${fechas.map(f=>{
+              const d = DateUtil.parse(f);
+              const dow = d.getDay(); // 0=dom, 6=sáb
+              const esWeekend = dow === 0 || dow === 6;
+              const diasAbrev = ['dom','lun','mar','mié','jue','vie','sáb'];
+              const nombreDia = diasAbrev[dow];
+              const diaLabel = `${d.getDate()}-${d.getMonth()+1}`;
+              const clases = ['cal-daycol', f===HOY?'is-hoy':'', esWeekend?'is-weekend':''].filter(Boolean).join(' ');
+              return `<td class="${clases}" data-fecha="${f}"><span class="cal-day-name">${nombreDia}</span><span class="cal-day-num">${diaLabel}</span></td>`;
+            }).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${ops.map(op=> this.rowHTML(op, fechas)).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  rowHTML(op, fechas){
+    return `
+      <tr data-operador-id="${op.id}">
+        <td class="cal-namecol">${this.esc(op.apellidoNombre)}</td>
+        ${fechas.map(f=> this.cellHTML(op.id, f)).join('')}
+      </tr>
+    `;
+  },
+
+  cellHTML(operadorId, fecha){
+    const eventosDia = Domain.eventosDeFecha(operadorId, fecha);
+    const ev = eventosDia.find(e=> e.tipo !== 'turnoCoord') || eventosDia[0];
+    const dow = DateUtil.parse(fecha).getDay();
+    const esWeekend = dow === 0 || dow === 6;
+    let style = '', label = '', cls = 'cal-cell';
+    if(fecha === HOY) cls += ' is-hoy';
+    if(esWeekend && !ev) cls += ' is-weekend';
+    if(ev){
+      // vacaciones ya pasadas se muestran con estilo opaco diferenciado
+      const tipoEstilo = (ev.tipo === 'vacaciones' && fecha < HOY) ? 'vacacionesPasadas' : ev.tipo;
+      const e = this.ESTILOS[tipoEstilo] || this.ESTILOS[ev.tipo];
+      if(e){
+        style = `background:${e.bg};color:${e.fg};`;
+        label = e.label(ev);
+        cls += ` cal-cell-evt evt-${ev.tipo}`;
+        if(esWeekend) cls += ' is-weekend';
+      }
+    }
+    return `<td class="${cls}" data-operador-id="${operadorId}" data-fecha="${fecha}" style="${style}">${label}</td>`;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  injectStyles(){
+    if(document.getElementById('calStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'calStyles';
+    style.textContent = `
+      .cal-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+      .cal-nav{ display:flex; align-items:center; gap:10px; }
+      .cal-mes-label{ font-family:var(--f-display); font-weight:700; font-size:15px; text-transform:capitalize; min-width:160px; text-align:center; }
+      .cal-legend{ display:flex; gap:14px; flex-wrap:wrap; }
+      .leg-item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-dim); }
+      .leg-item i{ width:11px; height:11px; border-radius:3px; display:inline-block; }
+
+      .cal-bloques-wrapper{ display:flex; flex-direction:column; gap:16px; }
+      .cal-block{ background:var(--white); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; }
+      .cal-block-head{ padding:10px 16px; border-bottom:1px solid var(--line); font-weight:700; font-family:var(--f-display); font-size:12.5px; display:flex; align-items:center; gap:8px; background:var(--paper-dim); }
+      .cal-scroll{ overflow-y:visible; overflow-x:auto; }
+      .cal-scroll::-webkit-scrollbar{ width:10px; height:10px; }
+      .cal-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; }
+      .cal-scroll::-webkit-scrollbar-track{ background:var(--paper-dim); }
+      .cal-table thead{ position:sticky; top:0; z-index:4; background:var(--white); }
+      .cal-table thead .cal-hoy-row td{ background:var(--white); }
+      .cal-table thead tr:last-child .cal-daycol{ background:var(--paper-dim); }
+
+      .cal-table{ border-collapse:collapse; font-size:11.8px; }
+      .cal-table td{ border-bottom:1px solid #EEEAE0; border-right:1px solid #EEEAE0; padding:0; height:30px; text-align:center; white-space:nowrap; }
+      .cal-namecol{ position:sticky; left:0; background:var(--white); z-index:2; text-align:left !important; padding:0 12px !important; font-weight:600; min-width:170px; border-right:2px solid var(--line) !important; }
+      thead .cal-namecol{ background:var(--paper-dim); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); font-weight:700; }
+      tbody tr:hover .cal-namecol{ background:var(--paper-dim); }
+
+      .cal-daycol{ width:var(--colw); min-width:var(--colw); font-family:var(--f-mono); font-size:10.5px; color:var(--ink-dim); background:var(--paper-dim); font-weight:500; cursor:default; height:38px !important; }
+      .cal-day-name{ display:block; font-size:9px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); opacity:.75; line-height:1.4; }
+      .cal-day-num{ display:block; font-size:11px; font-weight:600; color:var(--ink); line-height:1.4; }
+      .cal-daycol.is-hoy .cal-day-name, .cal-daycol.is-hoy .cal-day-num{ color:#8A6D2C; }
+      .cal-hoy-row td{ height:18px; border-bottom:none; font-size:9.5px; font-weight:700; color:var(--steel); letter-spacing:.08em; background:transparent; border-right:1px solid transparent; }
+      .is-hoy-marker{ background:var(--vacation-soft) !important; color:#8A6520 !important; }
+
+      .cal-cell{ cursor:pointer; transition:background .08s; position:relative; }
+      .cal-cell:hover{ background:#F1EFE8; }
+      .cal-cell.is-hoy{ box-shadow:inset 0 0 0 1px var(--vacation); background:#FFFBF0; }
+      .cal-cell.is-weekend:not(.cal-cell-evt){ background:#F0F2F6; }
+      .cal-daycol.is-weekend{ background:#EAECF2 !important; color:var(--ink-dim); }
+      .cal-daycol.is-weekend .cal-day-name, .cal-daycol.is-weekend .cal-day-num{ opacity:.65; }
+
+      .cal-filtros{ display:flex; align-items:center; gap:6px; }
+      .cal-filtros-label{ font-size:10.5px; font-weight:700; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em; margin-right:4px; }
+      .cal-chk-label{
+        display:inline-flex; align-items:center; gap:5px; cursor:pointer;
+        user-select:none; padding:5px 11px; border-radius:20px; font-size:11px; font-weight:600;
+        border:1.5px solid var(--line); background:var(--white); color:var(--ink-dim);
+        transition:all .15s;
+      }
+      .cal-chk-label:has(input:checked){ border-color:var(--navy); background:var(--navy); color:var(--white); }
+      .cal-chk-label input[type=checkbox]{ display:none; }
+      .cal-chk-label .tag{ font-size:10px; padding:2px 7px; }
+      .cal-cell-evt{ font-size:10px; font-weight:700; letter-spacing:.01em; }
+      .cal-cell-evt:hover{ filter:brightness(0.96); }
+      .cal-cell.is-selecting{ background:var(--steel) !important; box-shadow:inset 0 0 0 2px var(--navy); }
+
+      .cal-action-panel{
+        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+        background:var(--navy); color:#fff; border-radius:10px; padding:12px 16px;
+        box-shadow:0 14px 40px rgba(0,0,0,.32); z-index:60;
+        display:flex; align-items:center; gap:12px; flex-wrap:wrap; max-width:90vw;
+      }
+      .cal-action-panel .ap-info{ font-size:12px; color:rgba(255,255,255,.7); padding-right:10px; border-right:1px solid rgba(255,255,255,.18); }
+      .cal-action-panel .ap-info strong{ color:#fff; }
+      .cal-action-panel button{
+        background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.18);
+        padding:7px 13px; border-radius:6px; font-size:12px; font-weight:600;
+      }
+      .cal-action-panel button:hover{ background:rgba(255,255,255,.18); }
+      .cal-action-panel button.ap-cancel{ background:transparent; border-color:transparent; color:rgba(255,255,255,.55); }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindToolbar(){
+    document.getElementById('calPrev').addEventListener('click', ()=>{
+      let { year, monthIndex } = this.mesActual;
+      monthIndex--; if(monthIndex<0){ monthIndex=11; year--; }
+      this.mesActual = { year, monthIndex };
+      this.clearSeleccion();
+      this.render();
+    });
+    document.getElementById('calNext').addEventListener('click', ()=>{
+      let { year, monthIndex } = this.mesActual;
+      monthIndex++; if(monthIndex>11){ monthIndex=0; year++; }
+      this.mesActual = { year, monthIndex };
+      this.clearSeleccion();
+      this.render();
+    });
+    // checkboxes de filtro de bloques — toggle sin re-render completo (solo muestra/oculta el bloque)
+    ['AM','PM','COORD'].forEach(turno=>{
+      const chk = document.getElementById(`filtro${turno}`);
+      if(!chk) return;
+      chk.addEventListener('change', (e)=>{
+        this.filtros[turno] = e.target.checked;
+        const bloque = document.querySelector(`.cal-block[data-turno="${turno}"]`);
+        if(bloque) bloque.style.display = e.target.checked ? '' : 'none';
+      });
+    });
+  },
+
+  syncScroll(){
+    // mantiene alineadas las columnas de fecha entre los bloques AM, PM y COORD al hacer scroll horizontal
+    const blocks = ['calScrollAM','calScrollPM','calScrollCOORD']
+      .map(id=> document.getElementById(id))
+      .filter(Boolean);
+    if(blocks.length < 2) return;
+    let syncing = false;
+    blocks.forEach(src=>{
+      src.addEventListener('scroll', ()=>{
+        if(syncing) return;
+        syncing = true;
+        blocks.forEach(other=>{ if(other !== src) other.scrollLeft = src.scrollLeft; });
+        syncing = false;
+      });
+    });
+  },
+
+  scrollToHoy(){
+    // enfoca automáticamente la columna de HOY al abrir/cambiar de mes, si está dentro del mes visible
+    const doScroll = ()=>{
+      const blocks = ['calScrollAM','calScrollPM','calScrollCOORD']
+        .map(id=> document.getElementById(id))
+        .filter(Boolean);
+      const first = blocks[0];
+      if(!first) return;
+      const hoyCell = first.querySelector(`.cal-daycol[data-fecha="${HOY}"]`);
+      if(!hoyCell) return;
+      const targetLeft = Math.max(0, hoyCell.offsetLeft - first.clientWidth/2 + hoyCell.clientWidth/2);
+      blocks.forEach(b=> b.scrollLeft = targetLeft);
+    };
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 80); // refuerzo por si el layout no estaba asentado en el primer frame
+  },
+
+  bindGrid(root){
+    root.querySelectorAll('.cal-cell').forEach(cell=>{
+      cell.addEventListener('mousedown', (e)=> this.onCellMouseDown(e));
+      cell.addEventListener('mouseenter', (e)=> this.onCellMouseEnter(e));
+    });
+    document.addEventListener('mouseup', this._mouseUpHandler || (this._mouseUpHandler = ()=> this.onMouseUp()));
+  },
+
+  onCellMouseDown(e){
+    e.preventDefault();
+    this.dragging = true;
+    this.dragOperadorId = e.currentTarget.dataset.operadorId;
+    this.dragStartFecha = e.currentTarget.dataset.fecha;
+    this.paintSelectionRange(this.dragOperadorId, this.dragStartFecha, this.dragStartFecha);
+  },
+
+  onCellMouseEnter(e){
+    if(!this.dragging) return;
+    if(e.currentTarget.dataset.operadorId !== this.dragOperadorId) return; // no cruzar de fila
+    this.paintSelectionRange(this.dragOperadorId, this.dragStartFecha, e.currentTarget.dataset.fecha);
+  },
+
+  onMouseUp(){
+    if(!this.dragging) return;
+    this.dragging = false;
+    if(this.seleccion && this.seleccion.fechas.length){
+      this.showActionPanel();
+    }
+  },
+
+  paintSelectionRange(operadorId, fechaA, fechaB){
+    document.querySelectorAll('.cal-cell.is-selecting').forEach(c=> c.classList.remove('is-selecting'));
+    let [desde, hasta] = [fechaA, fechaB];
+    if(DateUtil.diffDays(desde, hasta) < 0) [desde, hasta] = [hasta, desde];
+    const fechas = [];
+    let cur = desde;
+    while(true){
+      fechas.push(cur);
+      if(cur === hasta) break;
+      cur = DateUtil.addDays(cur, 1);
+    }
+    fechas.forEach(f=>{
+      const cell = document.querySelector(`.cal-cell[data-operador-id="${operadorId}"][data-fecha="${f}"]`);
+      if(cell) cell.classList.add('is-selecting');
+    });
+    this.seleccion = { operadorId, fechas };
+  },
+
+  clearSeleccion(){
+    document.querySelectorAll('.cal-cell.is-selecting').forEach(c=> c.classList.remove('is-selecting'));
+    this.seleccion = null;
+    const panel = document.getElementById('calActionPanel');
+    if(panel) panel.style.display = 'none';
+  },
+
+  showActionPanel(){
+    const panel = document.getElementById('calActionPanel');
+    if(!panel) return;
+    const { operadorId, fechas } = this.seleccion;
+    const op = Domain.getOperador(operadorId);
+    const n = fechas.length;
+    const saldoVac = Domain.saldoVacaciones(operadorId);
+    const saldoFr = Domain.saldoFrancos(operadorId);
+    const esCoordinador = op.sector === 'Coordinacion';
+
+    panel.style.display = 'flex';
+    panel.innerHTML = `
+      <div class="ap-info"><strong>${this.esc(op.apellidoNombre)}</strong><br>${n} día${n===1?'':'s'} seleccionado${n===1?'':'s'}</div>
+      <button data-action="vacaciones" title="Saldo disponible: ${saldoVac} días">Vacaciones (${saldoVac} disp.)</button>
+      <button data-action="licencia">Licencia</button>
+      <button data-action="franco" ${saldoFr<=0 ? 'disabled style="opacity:.4;cursor:not-allowed;"':''} title="Saldo disponible: ${saldoFr} compensatorios">Compensatorio (${saldoFr} disp.)</button>
+      <button data-action="ausente">Ausente</button>
+      <button data-action="cambioTurno">Cambio de turno</button>
+      ${esCoordinador ? `<button data-action="turnoCoord">Turno del día</button>` : ''}
+      <button data-action="limpiar" style="background:rgba(181,72,61,.25);border-color:rgba(181,72,61,.4);">Borrar selección</button>
+      <button class="ap-cancel" data-action="cancelar">Cancelar</button>
+    `;
+    panel.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=> this.onActionClick(btn.dataset.action));
+    });
+  },
+
+  onActionClick(action){
+    const { operadorId, fechas } = this.seleccion;
+    const op = Domain.getOperador(operadorId);
+
+    if(action === 'cancelar'){ this.clearSeleccion(); this.render(); return; }
+
+    if(action === 'limpiar'){
+      DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha)));
+      Toast.show('Selección borrada');
+      this.clearSeleccion();
+      this.render();
+      Bus.emit();
+      return;
+    }
+
+    if(action === 'vacaciones'){
+      const saldo = Domain.saldoVacaciones(operadorId);
+      if(fechas.length > saldo){
+        Modal.open({
+          title:'Saldo insuficiente',
+          bodyHTML:`<p><strong>${this.esc(op.apellidoNombre)}</strong> tiene <strong>${saldo}</strong> día${saldo===1?'':'s'} disponible${saldo===1?'':'s'} de vacaciones, pero seleccionaste ${fechas.length}. Cargá más días en la pestaña "Vacaciones y francos" o reducí la selección.</p>`,
+          confirmText:'Entendido',
+          onConfirm:()=> true
+        });
+        return;
+      }
+      DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha)));
+      fechas.forEach(f=> DB.eventos.push({ id:'ev_'+Date.now()+'_'+f, operadorId, fecha:f, tipo:'vacaciones' }));
+      Toast.show(`Vacaciones asignadas (descuenta desde el año más antiguo)`);
+      this.clearSeleccion();
+      this.render();
+      Bus.emit();
+      return;
+    }
+
+    if(action === 'licencia'){
+      DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha)));
+      fechas.forEach(f=> DB.eventos.push({ id:'ev_'+Date.now()+'_'+f, operadorId, fecha:f, tipo:'licencia' }));
+      Toast.show('Licencia registrada');
+      this.clearSeleccion();
+      this.render();
+      Bus.emit();
+      return;
+    }
+
+    if(action === 'ausente'){
+      DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha) && e.tipo==='ausente'));
+      fechas.forEach(f=> DB.eventos.push({ id:'ev_aus_'+operadorId+'_'+f, operadorId, fecha:f, tipo:'ausente' }));
+      // si entre las fechas está HOY, mantiene sincronizado el switch de la pestaña Día de hoy
+      if(fechas.includes(HOY)){
+        DB.asistenciaHoy[`${operadorId}_${HOY}`] = 'ausente';
+      }
+      Toast.show(`Ausencia registrada (${fechas.length} día${fechas.length===1?'':'s'})`);
+      this.clearSeleccion();
+      this.render();
+      Bus.emit();
+      return;
+    }
+
+    if(action === 'franco'){
+      const saldo = Domain.saldoFrancos(operadorId);
+      if(saldo <= 0){ Toast.show('No hay compensatorios disponibles para asignar'); return; }
+      if(fechas.length > 1){
+        Toast.show('Seleccioná un solo día para asignar un compensatorio');
+        return;
+      }
+      this.confirmarFranco(operadorId, fechas[0]);
+      return;
+    }
+
+    if(action === 'cambioTurno'){
+      this.openCambioTurnoModal(operadorId, fechas);
+      return;
+    }
+
+    if(action === 'turnoCoord'){
+      this.openTurnoCoordModal(operadorId, fechas);
+      return;
+    }
+  },
+
+  confirmarFranco(operadorId, fecha){
+    // descuento FIFO automático: toma el crédito disponible más viejo (sin fecha cuenta como el más viejo)
+    const disponibles = Domain.creditosCompensatorioDisponibles(operadorId);
+    const credito = disponibles[0];
+    const op = Domain.getOperador(operadorId);
+    Modal.open({
+      title:'Asignar compensatorio',
+      bodyHTML:`<p>Se va a asignar un día de compensatorio para <strong>${this.esc(op.apellidoNombre)}</strong> el día ${DateUtil.formatShort(fecha)}, descontando del crédito ${credito && credito.fechaOrigen ? `del ${DateUtil.formatShort(credito.fechaOrigen)}` : 'más antiguo sin fecha'}.</p>`,
+      confirmText:'Asignar compensatorio',
+      onConfirm:()=>{
+        DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && e.fecha===fecha));
+        DB.eventos.push({ id:'ev_'+Date.now(), operadorId, fecha, tipo:'franco', origenFranco: credito ? (credito.fechaOrigen || '') : '' });
+        Toast.show('Compensatorio asignado');
+        this.clearSeleccion();
+        this.render();
+        Bus.emit();
+      }
+    });
+  },
+
+  openTurnoCoordModal(operadorId, fechas){
+    Modal.open({
+      title:'Turno del día — Coordinador',
+      bodyHTML:`
+        <p>Anotá qué turno cubrió este coordinador en los días seleccionados (solo a fines informativos, no afecta saldos).</p>
+        <div class="field">
+          <label>Turno</label>
+          <select id="turnoCoordSel">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+            <option value="Rotativo">Rotativo</option>
+          </select>
+        </div>
+      `,
+      confirmText:'Guardar',
+      onConfirm:(body)=>{
+        const turnoDia = body.querySelector('#turnoCoordSel').value;
+        DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha) && e.tipo==='turnoCoord'));
+        fechas.forEach(f=> DB.eventos.push({ id:'ev_'+Date.now()+'_'+f, operadorId, fecha:f, tipo:'turnoCoord', turnoDia }));
+        Toast.show('Turno del día guardado');
+        this.clearSeleccion();
+        this.render();
+        Bus.emit();
+      }
+    });
+  },
+
+  openCambioTurnoModal(operadorId, fechas){
+    Modal.open({
+      title:'Cambio de turno',
+      bodyHTML:`
+        <p>Asignar cambio de horario para los días seleccionados. El operario se mantiene en su fila y cuadro original.</p>
+        <div class="field">
+          <label>Nuevo turno para esos días</label>
+          <select id="turnoCambioSel">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+            <option value="Nocturno">Nocturno</option>
+          </select>
+        </div>
+      `,
+      confirmText:'Aplicar',
+      onConfirm:(body)=>{
+        const turnoCambio = body.querySelector('#turnoCambioSel').value;
+        DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && fechas.includes(e.fecha)));
+        fechas.forEach(f=> DB.eventos.push({ id:'ev_'+Date.now()+'_'+f, operadorId, fecha:f, tipo:'cambioTurno', turnoCambio }));
+        Toast.show('Cambio de turno aplicado');
+        this.clearSeleccion();
+        this.render();
+        Bus.emit();
+      }
+    });
+  }
+};
+
+Router.renderers.calendario = () => ViewCalendario.render();
+
+
+/* =======================================================================
+   view-vacaciones.js — PESTAÑA 3: Vacaciones y francos
+   ======================================================================= */
+
+const ViewVacaciones = {
+
+  periodosDisponibles(){
+    const anioHoy = DateUtil.parse(HOY).getFullYear();
+    const periodos = [];
+    for(let a = anioHoy - 4; a <= anioHoy + 2; a++) periodos.push(`${a}/${a+1}`);
+    return periodos;
+  },
+
+  periodoDefault(){
+    const anioHoy = DateUtil.parse(HOY).getFullYear();
+    return `${anioHoy}/${anioHoy+1}`;
+  },
+
+  render(){
+    const el = document.getElementById('view-vacaciones');
+    const amOps    = DB.operadores.filter(o=> o.turno==='AM' && o.sector!=='Coordinacion');
+    const pmOps    = DB.operadores.filter(o=> o.turno==='PM' && o.sector!=='Coordinacion');
+    const coordOps = DB.operadores.filter(o=> o.sector==='Coordinacion');
+    const vacMes   = this.vacacionesEsteMes();
+
+    el.innerHTML = `
+      <!-- formulario de carga -->
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head">
+          <h2>Asignar vacaciones</h2>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="count">FIFO por período</span>
+            <button class="btn btn-sm btn-primary" id="btnAsignarATodos">+ Asignar a todos</button>
+          </div>
+        </div>
+        <div class="vac-form-row">
+          <div class="field" style="margin:0;"><label>Operario</label>
+            <select id="vacOpSel" class="vac-sel">
+              <option value="">— Seleccionar —</option>
+              ${DB.operadores.map(op=>`<option value="${op.id}">${this.esc(op.apellidoNombre)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field" style="margin:0;"><label>Período</label>
+            <select id="vacPeriodoSel" class="vac-sel">
+              ${this.periodosDisponibles().map(p=>`<option value="${p}" ${p===this.periodoDefault()?'selected':''}>${p}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field" style="margin:0;"><label>Días</label>
+            <select id="vacDiasInput" class="vac-sel" style="width:80px;">
+              <option value="7">7</option>
+              <option value="14" selected>14</option>
+              <option value="21">21</option>
+              <option value="28">28</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnCargarCredito">Confirmar carga</button>
+        </div>
+      </div>
+
+      <!-- 3 cuadros a lo ancho con tabla tipo Excel -->
+      <div class="vac-grid">
+        <div class="panel vac-panel-turno">
+          <div class="panel-head tight"><h2><span class="tag tag-am">AM</span> Mañana</h2><span class="count">${amOps.length}</span></div>
+          ${this.tablaHTML(amOps)}
+        </div>
+        <div class="panel vac-panel-turno">
+          <div class="panel-head tight"><h2><span class="tag tag-pm">PM</span> Tarde</h2><span class="count">${pmOps.length}</span></div>
+          ${this.tablaHTML(pmOps)}
+        </div>
+        ${coordOps.length > 0 ? `
+        <div class="panel vac-panel-turno">
+          <div class="panel-head tight"><h2><span class="tag tag-coord">COORD</span> Coordinadores</h2><span class="count">${coordOps.length}</span></div>
+          ${this.tablaHTML(coordOps)}
+        </div>` : ''}
+      </div>
+
+      <!-- cuadro vacaciones del mes -->
+      <div class="panel" style="margin-top:12px;">
+        <div class="panel-head">
+          <h2>Vacaciones asignadas este mes</h2>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="count">${vacMes.length} asignación${vacMes.length===1?'':'es'}</span>
+            ${vacMes.length > 0 ? `<button class="btn btn-sm" id="btnExportarVacMes">Exportar Excel</button>` : ''}
+          </div>
+        </div>
+        <div class="hoy-alerts">
+          ${vacMes.length === 0
+            ? `<div class="empty-state">Todavía no se asignaron vacaciones este mes.</div>`
+            : vacMes.map(v=>`<div class="hoy-alert-item"><span class="alert-dot" style="background:var(--vacation);"></span><strong>${this.esc(v.operador)}</strong> — del ${DateUtil.formatShort(v.desde)} al ${DateUtil.formatShort(v.hasta)} (${v.dias} día${v.dias===1?'':'s'})</div>`).join('')
+          }
+        </div>
+      </div>
+    `;
+
+    this.injectStyles();
+    this.bindEvents(el);
+  },
+
+  // Tabla tipo Excel con 3 columnas: Operador (días) | Asignadas | Disponibles
+  tablaHTML(ops){
+    return `
+      <table class="vac-table-excel">
+        <thead>
+          <tr>
+            <th class="vac-th-op">Operador / días de vac.</th>
+            <th class="vac-th-num">Asignadas<br><span class="vac-th-sub">(en calendario)</span></th>
+            <th class="vac-th-num">Disponibles</th>
+            <th class="vac-th-btn"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ops.map(op=> this.filaHTML(op)).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  filaHTML(op){
+    const lotes  = Domain.lotesVacacionesConSaldo(op.id);
+    const total  = lotes.reduce((s,l)=> s+l.dias, 0);
+    const enCal  = Domain.vacacionesPendientesFuturas(op.id);  // futuros asignados
+    const resto  = Domain.saldoVacaciones(op.id);              // = total - (pasados + futuros)
+    const nombre = `${this.esc(op.apellidoNombre)}${total>0 ? ` <span class="vac-dias-totales">(${total}d)</span>` : ''}`;
+
+    return `
+      <tr class="vac-fila ${resto<0?'vac-fila-negativa':''}">
+        <td class="vac-td-op">${nombre}</td>
+        <td class="vac-td-num">${enCal>0?enCal:''}</td>
+        <td class="vac-td-num ${resto<0?'vac-num-negativo':resto===0&&total===0?'vac-num-cero':''}">${total===0?'0':resto}</td>
+        <td class="vac-td-btn">
+          <button class="vac-expand-btn" data-op-id="${op.id}" title="Ver períodos">▾</button>
+        </td>
+      </tr>
+      <tr class="vac-detalle-row" id="det_${op.id}" style="display:none;">
+        <td colspan="4" class="vac-td-detalle">
+          ${lotes.length === 0
+            ? `<span class="vac-det-vacio">Sin créditos cargados</span>`
+            : lotes.map(l=>`
+                <div class="vac-det-item ${l.agotado?'vac-det-agotado':''}">
+                  <span class="vac-det-periodo">${l.periodo}</span>
+                  <span class="vac-det-dias">${l.dias}d</span>
+                  <button class="chip-del" data-credito-id="${l.id}">×</button>
+                </div>`).join('')
+          }
+          <button class="btn btn-sm vac-det-add" data-action="add-credito" data-id="${op.id}">+ Período</button>
+        </td>
+      </tr>
+    `;
+  },
+
+  vacacionesEsteMes(){
+    const hoyDate = DateUtil.parse(HOY);
+    const mes = hoyDate.getMonth(), anio = hoyDate.getFullYear();
+    const porOperador = {};
+    DB.eventos.filter(e=> e.tipo==='vacaciones').forEach(e=>{
+      (porOperador[e.operadorId] ||= []).push(e.fecha);
+    });
+    const resultado = [];
+    Object.entries(porOperador).forEach(([opId, fechas])=>{
+      fechas = [...new Set(fechas)].sort();
+      let bloque = [fechas[0]]; const bloques = [];
+      for(let i=1;i<fechas.length;i++){
+        if(DateUtil.diffDays(fechas[i-1],fechas[i])===1) bloque.push(fechas[i]);
+        else { bloques.push(bloque); bloque=[fechas[i]]; }
+      }
+      bloques.push(bloque);
+      bloques.forEach(b=>{
+        const d = DateUtil.parse(b[0]);
+        if(d.getMonth()===mes && d.getFullYear()===anio){
+          const op = Domain.getOperador(opId);
+          if(op) resultado.push({operador:op.apellidoNombre, desde:b[0], hasta:b[b.length-1], dias:b.length});
+        }
+      });
+    });
+    return resultado.sort((a,b)=>a.desde.localeCompare(b.desde));
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  onExportarVacMes(vacMes){
+    const filas = vacMes.map(v=>({'Operario':v.operador,'Desde':v.desde,'Hasta':v.hasta,'Días':v.dias}));
+    const ws = XLSX.utils.json_to_sheet(filas);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Vacaciones del mes');
+    XLSX.writeFile(wb, `vacaciones_mes_${HOY}.xlsx`);
+    Toast.show('Excel exportado');
+  },
+
+  injectStyles(){
+    if(document.getElementById('vacStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'vacStyles';
+    style.textContent = `
+      .vac-form-row{ display:flex; align-items:flex-end; gap:8px; padding:10px 14px; flex-wrap:wrap; }
+      .vac-sel{ width:auto; min-width:140px; padding:5px 8px; font-size:11.5px; }
+
+      .vac-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; align-items:start; }
+      @media(max-width:1100px){ .vac-grid{ grid-template-columns:1fr 1fr; } }
+      @media(max-width:680px){ .vac-grid{ grid-template-columns:1fr; } }
+      .vac-panel-turno{ overflow:hidden; }
+      .panel-head.tight{ padding:8px 14px; }
+      .panel-head.tight h2{ font-size:13px; }
+
+      /* Tabla tipo Excel */
+      .vac-table-excel{ width:100%; border-collapse:collapse; font-size:11px; }
+      .vac-table-excel thead tr{ background:var(--paper-dim); border-bottom:2px solid var(--line); }
+      .vac-th-op{ padding:8px 12px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase;
+                  letter-spacing:.04em; color:var(--ink-dim); width:auto; }
+      .vac-th-num{ padding:8px 10px; text-align:center; font-size:11px; font-weight:700; text-transform:uppercase;
+                   letter-spacing:.04em; color:var(--ink-dim); width:82px; line-height:1.2; }
+      .vac-th-sub{ font-size:9.5px; font-weight:500; text-transform:none; color:var(--ink-dim); }
+      .vac-th-btn{ width:24px; }
+
+      .vac-fila{ border-bottom:1px solid var(--line); transition:background .1s; }
+      .vac-fila:hover{ background:var(--paper-dim); }
+      .vac-fila:hover .vac-expand-btn{ opacity:1; }
+      .vac-fila-negativa .vac-td-op{ color:var(--brick); }
+
+      .vac-td-op{ padding:8px 12px; font-size:12.5px; font-weight:600; color:var(--ink); }
+      .vac-dias-totales{ font-weight:400; color:var(--ink-dim); font-size:12px; }
+      .vac-td-num{ padding:8px 10px; text-align:center; font-family:var(--f-mono); font-weight:700; font-size:13px; color:var(--navy); }
+      .vac-num-negativo{ color:var(--brick); }
+      .vac-num-cero{ color:var(--ink-dim); font-weight:400; }
+      .vac-td-btn{ padding:0 4px; text-align:center; }
+
+      .vac-expand-btn{
+        background:none; border:1px solid var(--line); border-radius:4px;
+        cursor:pointer; color:var(--steel); font-size:11px;
+        padding:2px 5px; line-height:1; opacity:.6;
+        transition:all .15s;
+      }
+      .vac-expand-btn:hover{ opacity:1; background:var(--steel-soft); border-color:var(--steel); }
+      .vac-expand-btn.open{ transform:rotate(180deg); background:var(--steel-soft); border-color:var(--steel); opacity:1; }
+
+      /* Detalle desplegable */
+      .vac-detalle-row td{ padding:0; border-bottom:1px solid var(--line); }
+      .vac-td-detalle{
+        padding:8px 12px 10px 22px;
+        background:var(--vacation-soft);
+        border-top:1px solid #E5D9B6;
+      }
+      .vac-det-item{ display:flex; align-items:center; gap:8px; padding:3px 0; }
+      .vac-det-periodo{ font-family:var(--f-mono); font-size:11px; font-weight:600; color:#5A4010; flex:1; }
+      .vac-det-dias{ font-family:var(--f-mono); font-size:11px; font-weight:700; color:var(--steel); }
+      .vac-det-agotado .vac-det-periodo, .vac-det-agotado .vac-det-dias{ opacity:.35; text-decoration:line-through; }
+      .vac-det-vacio{ font-size:10.5px; color:var(--ink-dim); font-style:italic; }
+      .chip-del{ background:none; border:none; color:var(--brick); opacity:.4; font-size:13px; cursor:pointer; padding:0 2px; }
+      .chip-del:hover{ opacity:1; }
+      .vac-det-add{ margin-top:6px; }
+
+      .hoy-alerts{ padding:4px 0; }
+      .hoy-alert-item{ display:flex; align-items:center; gap:8px; padding:7px 14px; font-size:10.5px; border-bottom:1px solid var(--line); }
+      .hoy-alert-item:last-child{ border-bottom:none; }
+      .alert-dot{ width:5px; height:5px; border-radius:50%; background:var(--steel); flex:0 0 5px; }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindEvents(el){
+    // expandir/colapsar detalle
+    el.querySelectorAll('.vac-expand-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const opId = e.currentTarget.dataset.opId;
+        const det = document.getElementById('det_'+opId);
+        const open = det.style.display !== 'none';
+        det.style.display = open ? 'none' : '';
+        e.currentTarget.classList.toggle('open', !open);
+      });
+    });
+
+    // borrar lote
+    el.querySelectorAll('.chip-del').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const creditoId = e.currentTarget.dataset.creditoId;
+        const credito = DB.vacacionesCreditos.find(c=> c.id===creditoId);
+        if(!credito) return;
+        Modal.open({
+          title:'Borrar lote de vacaciones',
+          bodyHTML:`<p>¿Confirmás borrar el lote <strong>${Domain.loteGetPeriodo(credito)}: ${credito.dias} días</strong> de <strong>${this.esc(Domain.getOperador(credito.operadorId)?.apellidoNombre||'')}</strong>? Si hay vacaciones futuras asignadas que dependan de este saldo, se borran automáticamente del calendario.</p>`,
+          confirmText:'Borrar',
+          onConfirm:()=>{
+            DB.vacacionesCreditos = DB.vacacionesCreditos.filter(c=> c.id!==creditoId);
+            const borrados = Domain.corregirSaldoNegativoVacaciones(credito.operadorId);
+            Toast.show(borrados>0 ? `Lote eliminado — se quitaron ${borrados} día${borrados===1?'':'s'} del calendario` : 'Lote eliminado');
+            this.render(); Bus.emit();
+          }
+        });
+      });
+    });
+
+    // agregar período desde el detalle
+    el.querySelectorAll('[data-action="add-credito"]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const opId = e.currentTarget.dataset.id;
+        Modal.open({
+          title:'Agregar período',
+          bodyHTML:`
+            <div class="field"><label>Período</label>
+              <select id="addPeriodoSel" class="vac-sel">
+                ${this.periodosDisponibles().map(p=>`<option value="${p}" ${p===this.periodoDefault()?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label>Días</label>
+              <select id="addDiasInput" class="vac-sel">
+                <option value="7">7</option><option value="14" selected>14</option>
+                <option value="21">21</option><option value="28">28</option>
+              </select>
+            </div>`,
+          confirmText:'Agregar',
+          onConfirm:(body)=>{
+            const periodo = body.querySelector('#addPeriodoSel').value;
+            const dias = parseInt(body.querySelector('#addDiasInput').value)||0;
+            const lote = DB.vacacionesCreditos.find(v=> v.operadorId===opId && Domain.loteGetPeriodo(v)===periodo);
+            if(lote) lote.dias+=dias;
+            else DB.vacacionesCreditos.push({id:'vc_'+Date.now(), operadorId:opId, periodo, dias});
+            Toast.show('Período agregado'); this.render(); Bus.emit();
+          }
+        });
+      });
+    });
+
+    // confirmar carga desde el formulario principal
+    const btnCargar = document.getElementById('btnCargarCredito');
+    if(btnCargar){
+      btnCargar.addEventListener('click', ()=>{
+        const opId = document.getElementById('vacOpSel').value;
+        const periodo = document.getElementById('vacPeriodoSel').value;
+        const dias = parseInt(document.getElementById('vacDiasInput').value)||0;
+        if(!opId){ Toast.show('Elegí un operario'); return; }
+        Modal.open({
+          title:'Confirmar carga',
+          bodyHTML:`<p>Se cargan <strong>${dias} días</strong> del período <strong>${periodo}</strong> a <strong>${this.esc(Domain.getOperador(opId)?.apellidoNombre||'')}</strong>.</p>`,
+          confirmText:'Confirmar',
+          onConfirm:()=>{
+            const lote = DB.vacacionesCreditos.find(v=> v.operadorId===opId && Domain.loteGetPeriodo(v)===periodo);
+            if(lote) lote.dias+=dias;
+            else DB.vacacionesCreditos.push({id:'vc_'+Date.now(), operadorId:opId, periodo, dias});
+            Toast.show('Crédito cargado'); this.render(); Bus.emit();
+          }
+        });
+      });
+    }
+
+    // asignar a todos
+    const btnTodos = document.getElementById('btnAsignarATodos');
+    if(btnTodos){
+      btnTodos.addEventListener('click', ()=>{
+        Modal.open({
+          title:'Asignar a todos',
+          bodyHTML:`
+            <p>Se suma la misma cantidad de días a <strong>cada operador</strong> individualmente.</p>
+            <div class="field"><label>Período</label>
+              <select id="todosPeriodoSel" class="vac-sel">
+                ${this.periodosDisponibles().map(p=>`<option value="${p}" ${p===this.periodoDefault()?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label>Días a sumar</label>
+              <select id="todosDiasInput" class="vac-sel">
+                <option value="7">7</option><option value="14" selected>14</option>
+                <option value="21">21</option><option value="28">28</option>
+              </select>
+            </div>`,
+          confirmText:'Confirmar asignación masiva',
+          onConfirm:(body)=>{
+            const periodo = body.querySelector('#todosPeriodoSel').value;
+            const dias = parseInt(body.querySelector('#todosDiasInput').value)||7;
+            const afectados = Domain.asignarCreditoATodos(dias, periodo);
+            Toast.show(`+${dias} días período ${periodo} asignados a ${afectados} operarios`);
+            this.render(); Bus.emit();
+          }
+        });
+      });
+    }
+
+    // exportar Excel del mes
+    const btnExp = document.getElementById('btnExportarVacMes');
+    if(btnExp) btnExp.addEventListener('click', ()=> this.onExportarVacMes(this.vacacionesEsteMes()));
+  }
+};
+
+Router.renderers.vacaciones = () => ViewVacaciones.render();
+
+const ViewCompensatorios = {
+  // Estado de la asignación grupal en progreso (antes de confirmar)
+  grupoEnCurso: null, // { fecha, operadores: [{operadorId, horarioDesde, horarioHasta}] }
+
+  render(){
+    const el = document.getElementById('view-compensatorios');
+    const ops = DB.operadores;
+    // Grupos activos: confirmados cuya fecha >= HOY
+    const gruposActivos = DB.gruposCompensatorios
+      .filter(g=> g.confirmado && g.fecha >= HOY)
+      .sort((a,b)=> a.fecha.localeCompare(b.fecha));
+    // Solo operarios con saldo positivo aparecen en "Días a favor"
+    const opsConCreditos = ops.filter(op=> Domain.saldoFrancos(op.id) > 0);
+
+    el.innerHTML = `
+      <div class="comp-layout">
+        <!-- COLUMNA IZQUIERDA: asignación grupal + individual -->
+        <div class="comp-col-izq">
+
+          <!-- ASIGNACIÓN GRUPAL -->
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Asignación grupal por fecha</h2>
+              <button class="btn btn-primary btn-sm" id="btnNuevoGrupo">+ Nueva fecha</button>
+            </div>
+
+            <!-- Editor de grupo en curso (antes de confirmar) -->
+            ${this.grupoEnCurso ? this.editorGrupoHTML() : ''}
+
+            <!-- Grupos confirmados activos -->
+            ${gruposActivos.length === 0 && !this.grupoEnCurso
+              ? `<div class="empty-state">No hay fechas grupales activas. Creá una con el botón de arriba.</div>`
+              : gruposActivos.map(g=> this.tablaGrupoHTML(g)).join('')
+            }
+          </div>
+
+          <!-- ASIGNACIÓN INDIVIDUAL -->
+          <div class="panel" style="margin-top:14px;">
+            <div class="panel-head">
+              <h2>Asignación individual</h2>
+              <span class="count">Un crédito por operario</span>
+            </div>
+            <div class="comp-ind-row">
+              <div class="field" style="margin:0;"><label>Operario</label>
+                <select id="compIndOpSel" class="comp-sel">
+                  <option value="">— Seleccionar operario —</option>
+                  ${ops.map(op=>`<option value="${op.id}">${this.esc(op.apellidoNombre)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field" style="margin:0;"><label>Fecha (opcional)</label>
+                <input type="date" id="compIndFechaInput">
+              </div>
+              <button class="btn btn-primary btn-sm" id="btnConfirmarInd">Confirmar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: días a favor -->
+        <div class="panel comp-col-der">
+          <div class="panel-head tight">
+            <h2>Días a favor</h2>
+            <span class="count">${opsConCreditos.length} operarios con créditos</span>
+          </div>
+          <table class="comp-tabla-creditos">
+            <thead>
+              <tr>
+                <th>Operador</th>
+                <th class="comp-th-num">Créditos<br>disponibles</th>
+                <th class="comp-th-btn"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${opsConCreditos.length === 0
+                ? `<tr><td colspan="3" class="empty-state">Todavía no hay créditos asignados.</td></tr>`
+                : opsConCreditos.map(op=> this.filaCreditos(op)).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    this.injectStyles();
+    this.bindEvents(el);
+  },
+
+  editorGrupoHTML(){
+    const g = this.grupoEnCurso;
+    const ops = DB.operadores;
+    return `
+      <div class="comp-editor-grupo">
+        <div class="comp-editor-head">
+          <div class="field" style="margin:0;display:flex;align-items:center;gap:10px;">
+            <label style="white-space:nowrap;font-weight:700;">Fecha del grupo</label>
+            <input type="date" id="grupoFechaInput" value="${g.fecha}" class="comp-fecha-input">
+          </div>
+          <span class="count">${g.operadores.length} operario${g.operadores.length===1?'':'s'} agregado${g.operadores.length===1?'':'s'}</span>
+        </div>
+        <table class="comp-grupo-tabla">
+          <thead>
+            <tr>
+              <th>Operario</th>
+              <th>Horario desde</th>
+              <th>Horario hasta</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="grupoOpsTbody">
+            ${g.operadores.map((row,i)=> this.grupoFilaHTML(row, i, ops)).join('')}
+          </tbody>
+        </table>
+        <div class="comp-editor-footer">
+          <select id="grupoAddOpSel" class="comp-sel">
+            <option value="">+ Agregar operario</option>
+            ${ops.filter(op=> !g.operadores.some(r=> r.operadorId===op.id))
+                 .map(op=>`<option value="${op.id}">${this.esc(op.apellidoNombre)}</option>`).join('')}
+          </select>
+          <div class="comp-editor-btns">
+            <button class="btn btn-sm" id="btnCancelarGrupo">Cancelar</button>
+            <button class="btn btn-primary btn-sm" id="btnConfirmarGrupo" ${g.operadores.length===0?'disabled':''}>
+              Confirmar grupo (${g.operadores.length} créditos)
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  grupoFilaHTML(row, i, ops){
+    const op = ops.find(o=> o.id===row.operadorId);
+    return `
+      <tr data-idx="${i}">
+        <td class="comp-gt-nombre">${op ? this.esc(op.apellidoNombre) : row.operadorId}</td>
+        <td><input type="time" class="comp-horario" data-idx="${i}" data-campo="horarioDesde" value="${row.horarioDesde||''}"></td>
+        <td><input type="time" class="comp-horario" data-idx="${i}" data-campo="horarioHasta" value="${row.horarioHasta||''}"></td>
+        <td><button class="comp-del-op" data-idx="${i}" title="Quitar">×</button></td>
+      </tr>`;
+  },
+
+  tablaGrupoHTML(g){
+    const ops = DB.operadores;
+    return `
+      <div class="comp-grupo-card" data-grupo-id="${g.id}">
+        <div class="comp-grupo-card-head">
+          <span class="comp-grupo-fecha">${DateUtil.formatShort(g.fecha)}</span>
+          <span class="count">${g.operadores.length} operarios</span>
+          <div style="display:flex;gap:6px;margin-left:auto;">
+            <button class="btn btn-sm comp-btn-editar-grupo" data-grupo-id="${g.id}">Editar</button>
+            <button class="btn btn-sm comp-btn-excel-grupo" data-grupo-id="${g.id}">Exportar Excel</button>
+            <button class="btn btn-sm comp-btn-borrar-grupo" data-grupo-id="${g.id}" style="color:var(--brick);border-color:var(--brick);">Borrar</button>
+          </div>
+        </div>
+        <table class="comp-grupo-tabla comp-grupo-vista">
+          <thead>
+            <tr><th>Operario</th><th>Rango horario</th></tr>
+          </thead>
+          <tbody>
+            ${g.operadores.map(row=>{
+              const op = ops.find(o=> o.id===row.operadorId);
+              const horario = row.horarioDesde && row.horarioHasta
+                ? `de ${row.horarioDesde} hasta ${row.horarioHasta}`
+                : row.horarioDesde ? `desde ${row.horarioDesde}` : '—';
+              return `<tr><td>${op ? this.esc(op.apellidoNombre) : '?'}</td><td class="comp-gt-horario">${horario}</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  },
+
+  filaCreditos(op){
+    const creditos = DB.compensatorios.filter(c=> c.operadorId===op.id);
+    const saldo = Domain.saldoFrancos(op.id);
+    return `
+      <tr class="comp-fila-cred ${saldo<0?'comp-negativo':''}">
+        <td class="comp-td-nombre">${this.esc(op.apellidoNombre)}</td>
+        <td class="comp-td-saldo">${creditos.length>0 ? saldo : ''}</td>
+        <td class="comp-td-btn">
+          ${creditos.length>0 ? `<button class="vac-expand-btn" data-op-id="${op.id}">▾</button>` : ''}
+        </td>
+      </tr>
+      <tr class="vac-detalle-row" id="compDet_${op.id}" style="display:none;">
+        <td colspan="3" class="vac-td-detalle">
+          ${creditos.map(c=>{
+            const tomados = DB.eventos.filter(e=> e.operadorId===op.id && e.tipo==='franco').length;
+            const idx = creditos.indexOf(c);
+            const consumido = idx < tomados;
+            const origen = c.fechaOrigen
+              ? `${c.origenTipo==='grupal'?'Grupal':'Individual'} — ${DateUtil.formatShort(c.fechaOrigen)}`
+              : `${c.origenTipo==='grupal'?'Grupal':'Individual'} — sin fecha`;
+            return `<div class="comp-det-item ${consumido?'comp-det-consumido':''}">
+              <span class="comp-det-origen">${origen}</span>
+              <span class="comp-det-estado">${consumido?'✓ Tomado':'Disponible'}</span>
+            </div>`;
+          }).join('')}
+        </td>
+      </tr>`;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  injectStyles(){
+    if(document.getElementById('compStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'compStyles';
+    style.textContent = `
+      .comp-layout{ display:grid; grid-template-columns:1.2fr 0.8fr; gap:14px; align-items:start; }
+      @media(max-width:1000px){ .comp-layout{ grid-template-columns:1fr; } }
+      .comp-col-izq{ display:flex; flex-direction:column; }
+      .comp-col-der{ min-width:0; }
+      .panel-head.tight{ padding:8px 14px; }
+
+      /* Selector y campos */
+      .comp-sel{ width:auto; min-width:180px; padding:6px 9px; font-size:11.5px; }
+      .comp-fecha-input{ padding:6px 9px; font-size:11.5px; font-family:var(--f-mono); }
+      .comp-ind-row{ display:flex; align-items:flex-end; gap:8px; padding:10px 14px; flex-wrap:wrap; }
+
+      /* Editor de grupo en curso */
+      .comp-editor-grupo{ border:1.5px dashed var(--amber); border-radius:8px; margin:10px 14px 14px; padding:12px 14px; background:var(--amber-soft); }
+      .comp-editor-head{ display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+      .comp-editor-footer{ display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+      .comp-editor-btns{ display:flex; gap:8px; margin-left:auto; }
+
+      /* Tabla del editor */
+      .comp-grupo-tabla{ width:100%; border-collapse:collapse; font-size:11px; margin-top:6px; }
+      .comp-grupo-tabla th{ padding:5px 8px; text-align:left; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); background:var(--paper-dim); border-bottom:1px solid var(--line); }
+      .comp-grupo-tabla td{ padding:5px 8px; border-bottom:1px solid var(--line); }
+      .comp-gt-nombre{ font-weight:600; font-size:11px; }
+      .comp-horario{ width:90px; padding:4px 6px; font-size:11px; font-family:var(--f-mono); }
+      .comp-del-op{ background:none; border:none; color:var(--brick); opacity:.5; font-size:15px; cursor:pointer; padding:0 4px; }
+      .comp-del-op:hover{ opacity:1; }
+
+      /* Tarjeta de grupo confirmado */
+      .comp-grupo-card{ margin:10px 14px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+      .comp-grupo-card-head{ display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--steel-soft); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+      .comp-grupo-fecha{ font-family:var(--f-mono); font-weight:700; font-size:13px; color:var(--navy); }
+      .comp-grupo-vista th{ background:var(--paper-dim); }
+      .comp-gt-horario{ font-family:var(--f-mono); font-size:10.5px; color:var(--ink-dim); }
+
+      /* Tabla días a favor */
+      .comp-tabla-creditos{ width:100%; border-collapse:collapse; font-size:11px; }
+      .comp-tabla-creditos th{ padding:6px 10px; text-align:left; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); background:var(--paper-dim); border-bottom:2px solid var(--line); }
+      .comp-th-num{ text-align:center; width:70px; }
+      .comp-th-btn{ width:28px; }
+      .comp-fila-cred{ border-bottom:1px solid var(--line); }
+      .comp-fila-cred:hover{ background:var(--paper-dim); }
+      .comp-fila-cred:hover .vac-expand-btn{ opacity:1; }
+      .comp-td-nombre{ padding:6px 10px; font-weight:600; font-size:11px; }
+      .comp-td-saldo{ padding:6px 8px; text-align:center; font-family:var(--f-mono); font-weight:700; font-size:13px; color:var(--navy); }
+      .comp-negativo .comp-td-saldo{ color:var(--brick); }
+      .comp-td-btn{ padding:0 4px; text-align:center; }
+
+      /* Detalle de créditos */
+      .comp-det-item{ display:flex; align-items:center; justify-content:space-between; padding:3px 0; font-size:10.5px; gap:10px; }
+      .comp-det-origen{ font-family:var(--f-mono); color:#5A4010; font-size:10.5px; }
+      .comp-det-estado{ font-size:9.5px; color:var(--ink-dim); font-weight:600; }
+      .comp-det-consumido .comp-det-origen{ opacity:.4; text-decoration:line-through; }
+      .comp-det-consumido .comp-det-estado{ color:var(--sage); }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindEvents(el){
+    // Expandir días a favor
+    el.querySelectorAll('.vac-expand-btn').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const opId = e.currentTarget.dataset.opId;
+        const det = document.getElementById('compDet_'+opId);
+        if(!det) return;
+        const open = det.style.display !== 'none';
+        det.style.display = open ? 'none' : '';
+        e.currentTarget.classList.toggle('open', !open);
+      });
+    });
+
+    // Botón nueva fecha grupal
+    document.getElementById('btnNuevoGrupo')?.addEventListener('click', ()=>{
+      this.grupoEnCurso = { fecha: HOY, operadores: [] };
+      this.render();
+    });
+
+    // Cancelar editor
+    document.getElementById('btnCancelarGrupo')?.addEventListener('click', ()=>{
+      this.grupoEnCurso = null;
+      this.render();
+    });
+
+    // Cambiar fecha del grupo en curso
+    document.getElementById('grupoFechaInput')?.addEventListener('change', e=>{
+      this.grupoEnCurso.fecha = e.target.value;
+      this.render();
+    });
+
+    // Agregar operario al grupo en curso
+    document.getElementById('grupoAddOpSel')?.addEventListener('change', e=>{
+      const opId = e.target.value;
+      if(!opId) return;
+      this.grupoEnCurso.operadores.push({ operadorId:opId, horarioDesde:'', horarioHasta:'' });
+      this.render();
+    });
+
+    // Editar horarios en grupo en curso
+    el.querySelectorAll('.comp-horario').forEach(input=>{
+      input.addEventListener('change', e=>{
+        const idx = parseInt(e.target.dataset.idx);
+        const campo = e.target.dataset.campo;
+        this.grupoEnCurso.operadores[idx][campo] = e.target.value;
+      });
+    });
+
+    // Quitar operario del grupo en curso
+    el.querySelectorAll('.comp-del-op').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const idx = parseInt(e.currentTarget.dataset.idx);
+        this.grupoEnCurso.operadores.splice(idx, 1);
+        this.render();
+      });
+    });
+
+    // Confirmar grupo
+    document.getElementById('btnConfirmarGrupo')?.addEventListener('click', ()=>{
+      const g = this.grupoEnCurso;
+      if(!g.fecha){ Toast.show('Elegí una fecha para el grupo'); return; }
+      if(g.operadores.length===0){ Toast.show('Agregá al menos un operario'); return; }
+
+      Modal.open({
+        title:'Confirmar asignación grupal',
+        bodyHTML:`<p>Se va a sumar <strong>1 crédito compensatorio</strong> a <strong>${g.operadores.length} operarios</strong> por la fecha <strong>${DateUtil.formatShort(g.fecha)}</strong>.</p>`,
+        confirmText:'Confirmar',
+        onConfirm:()=>{
+          const grupoId = 'grp_'+Date.now();
+          // guardar el grupo
+          DB.gruposCompensatorios.push({ id:grupoId, fecha:g.fecha, operadores:[...g.operadores], confirmado:true });
+          // crear un crédito por operario
+          g.operadores.forEach(row=>{
+            DB.compensatorios.push({
+              id:'c_'+Date.now()+'_'+row.operadorId,
+              operadorId:row.operadorId,
+              fechaOrigen:g.fecha,
+              origenTipo:'grupal',
+              grupoId
+            });
+          });
+          Toast.show(`${g.operadores.length} créditos asignados`);
+          this.grupoEnCurso = null;
+          this.render();
+          Bus.emit();
+        }
+      });
+    });
+
+    // Editar grupo confirmado (abre el editor con los datos del grupo)
+    el.querySelectorAll('.comp-btn-editar-grupo').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const grupoId = e.currentTarget.dataset.grupoId;
+        const g = DB.gruposCompensatorios.find(g=> g.id===grupoId);
+        if(!g) return;
+        // Nota: editar un grupo confirmado permite agregar/quitar operarios
+        // y ajustar horarios. Los créditos se recalculan al re-confirmar.
+        Modal.open({
+          title:'Editar grupo',
+          bodyHTML:`<p>Vas a entrar al modo de edición del grupo del <strong>${DateUtil.formatShort(g.fecha)}</strong>.<br>Podés agregar o quitar operarios y cambiar horarios. Los créditos se actualizarán al re-confirmar.</p>`,
+          confirmText:'Editar',
+          onConfirm:()=>{
+            // Borrar créditos del grupo anterior y traer los datos al editor
+            DB.compensatorios = DB.compensatorios.filter(c=> c.grupoId !== grupoId);
+            DB.gruposCompensatorios = DB.gruposCompensatorios.filter(g=> g.id!==grupoId);
+            this.grupoEnCurso = { fecha:g.fecha, operadores:[...g.operadores] };
+            this.render();
+            Bus.emit();
+          }
+        });
+      });
+    });
+
+    // Exportar Excel del grupo
+    el.querySelectorAll('.comp-btn-excel-grupo').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const grupoId = e.currentTarget.dataset.grupoId;
+        const g = DB.gruposCompensatorios.find(g=> g.id===grupoId);
+        if(!g) return;
+        const filas = g.operadores.map(row=>{
+          const op = Domain.getOperador(row.operadorId);
+          return {
+            'Nombre': op ? op.apellidoNombre : row.operadorId,
+            'Fecha': g.fecha,
+            'Horario desde': row.horarioDesde || '',
+            'Horario hasta': row.horarioHasta || '',
+          };
+        });
+        const ws = XLSX.utils.json_to_sheet(filas);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Compensatorios');
+        XLSX.writeFile(wb, `compensatorios_${g.fecha}.xlsx`);
+        Toast.show('Excel exportado');
+      });
+    });
+
+    // Borrar grupo confirmado
+    el.querySelectorAll('.comp-btn-borrar-grupo').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const grupoId = e.currentTarget.dataset.grupoId;
+        const g = DB.gruposCompensatorios.find(g=> g.id===grupoId);
+        if(!g) return;
+        Modal.open({
+          title:'Borrar grupo',
+          bodyHTML:`<p>¿Confirmás borrar el grupo del <strong>${DateUtil.formatShort(g.fecha)}</strong>? Se eliminarán los ${g.operadores.length} créditos asignados a partir de este grupo.</p>`,
+          confirmText:'Borrar',
+          onConfirm:()=>{
+            DB.compensatorios = DB.compensatorios.filter(c=> c.grupoId!==grupoId);
+            DB.gruposCompensatorios = DB.gruposCompensatorios.filter(g=> g.id!==grupoId);
+            Toast.show('Grupo eliminado');
+            this.render();
+            Bus.emit();
+          }
+        });
+      });
+    });
+
+    // Asignación individual
+    document.getElementById('btnConfirmarInd')?.addEventListener('click', ()=>{
+      const opId = document.getElementById('compIndOpSel').value;
+      const fecha = document.getElementById('compIndFechaInput').value;
+      if(!opId){ Toast.show('Elegí un operario'); return; }
+      Modal.open({
+        title:'Confirmar crédito individual',
+        bodyHTML:`<p>Se va a sumar <strong>1 crédito compensatorio</strong> a <strong>${this.esc(Domain.getOperador(opId)?.apellidoNombre||'')}</strong>${fecha ? ` por el día <strong>${DateUtil.formatShort(fecha)}</strong>` : ' <em>(sin fecha)</em>'}.</p>`,
+        confirmText:'Confirmar',
+        onConfirm:()=>{
+          DB.compensatorios.push({
+            id:'c_'+Date.now(),
+            operadorId:opId,
+            fechaOrigen:fecha||'',
+            origenTipo:'individual',
+          });
+          document.getElementById('compIndOpSel').value = '';
+          document.getElementById('compIndFechaInput').value = '';
+          Toast.show('Crédito individual asignado');
+          this.render();
+          Bus.emit();
+        }
+      });
+    });
+  }
+};
+
+Router.renderers.compensatorios = () => ViewCompensatorios.render();
+
+
+
+/* =======================================================================
+   view-hoy.js — PESTAÑA 4: Día de hoy
+   ======================================================================= */
+
+const ViewHoy = {
+  orden: 'nombre', // nombre | sector
+
+  render(){
+    const el = document.getElementById('view-hoy');
+    let amOps = DB.operadores.filter(o=> o.turno === 'AM' && o.sector !== 'Coordinacion');
+    let pmOps = DB.operadores.filter(o=> o.turno === 'PM' && o.sector !== 'Coordinacion');
+    let coordOps = DB.operadores.filter(o=> o.sector === 'Coordinacion');
+
+    const comparador = this.orden === 'sector'
+      ? (a,b)=> (a.sector||'').localeCompare(b.sector||'') || a.apellidoNombre.localeCompare(b.apellidoNombre)
+      : (a,b)=> a.apellidoNombre.localeCompare(b.apellidoNombre);
+    amOps = [...amOps].sort(comparador);
+    pmOps = [...pmOps].sort(comparador);
+    coordOps = [...coordOps].sort(comparador);
+
+    const alerts = Domain.proximosEventos();
+    const vacMes = Domain.vacacionesDelProximoMes();
+
+    el.innerHTML = `
+      <div class="hoy-fecha-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        ${DateUtil.formatLong(HOY)}
+        <label class="hoy-orden-label">Ordenar
+          <select id="hoyOrdenSel" class="hoy-orden-select">
+            <option value="nombre" ${this.orden==='nombre'?'selected':''}>Alfabético</option>
+            <option value="sector" ${this.orden==='sector'?'selected':''}>Por sector</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="hoy-grid ${coordOps.length === 0 ? 'no-coord' : ''}">
+        <div class="panel hoy-block" data-turno="AM">
+          <div class="panel-head"><h2><span class="tag tag-am">AM</span> Mañana</h2><span class="count">${amOps.length}</span></div>
+          <div id="hoyListAM"></div>
+        </div>
+        <div class="panel hoy-block" data-turno="PM">
+          <div class="panel-head"><h2><span class="tag tag-pm">PM</span> Tarde</h2><span class="count">${pmOps.length}</span></div>
+          <div id="hoyListPM"></div>
+        </div>
+        ${coordOps.length > 0 ? `
+        <div class="panel hoy-block" data-turno="COORD">
+          <div class="panel-head"><h2><span class="tag tag-coord">COORD</span> Coordinadores</h2><span class="count">${coordOps.length}</span></div>
+          <div id="hoyListCOORD"></div>
+        </div>` : ''}
+        <div class="hoy-side-col">
+          <div class="panel">
+            <div class="panel-head"><h2>Próximos eventos</h2><span class="count">${alerts.length}</span></div>
+            <div class="hoy-alerts">
+              ${alerts.length === 0
+                ? `<div class="empty-state">No hay vacaciones ni licencias por empezar o terminar próximamente.</div>`
+                : alerts.map(a=> `<div class="hoy-alert-item"><span class="alert-dot"></span>${a.texto}</div>`).join('')
+              }
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Vacaciones del mes</h2>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="count">${vacMes.length}</span>
+                ${vacMes.length > 0 ? `<button class="btn btn-sm" id="btnExportarVacMes">Excel</button>` : ''}
+              </div>
+            </div>
+            <div class="hoy-alerts">
+              ${vacMes.length === 0
+                ? `<div class="empty-state">Sin vacaciones para el mes próximo.</div>`
+                : vacMes.map(v=> `<div class="hoy-alert-item"><span class="alert-dot" style="background:var(--vacation);"></span><strong>${this.esc(v.operador)}</strong> — del ${DateUtil.formatShort(v.desde)} al ${DateUtil.formatShort(v.hasta)} (${v.dias}d)</div>`).join('')
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.injectStyles();
+    document.getElementById('hoyListAM').innerHTML = this.listHTML(amOps);
+    document.getElementById('hoyListPM').innerHTML = this.listHTML(pmOps);
+    const coordList = document.getElementById('hoyListCOORD');
+    if(coordList) coordList.innerHTML = this.listHTML(coordOps);
+    this.bindSwitches(el);
+    const btnExp = document.getElementById('btnExportarVacMes');
+    if(btnExp) btnExp.addEventListener('click', ()=> this.onExportarVacMes(vacMes));
+    const ordenSel = document.getElementById('hoyOrdenSel');
+    if(ordenSel) ordenSel.addEventListener('change', (e)=>{ this.orden = e.target.value; this.render(); });
+  },
+
+  listHTML(ops){
+    if(ops.length === 0) return `<div class="empty-state">Sin operarios en este turno.</div>`;
+    return `
+      <table class="hoy-table">
+        <tbody>
+          ${ops.map(op=> this.rowHTML(op)).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  rowHTML(op){
+    // Solo vacaciones y licencia bloquean la fila (ausente sigue permitiendo togglear el switch)
+    const bloqueante = DB.eventos.find(e=> e.operadorId===op.id && e.fecha===HOY &&
+      (e.tipo==='vacaciones' || e.tipo==='licencia'));
+    if(bloqueante){
+      const bloque = Domain.bloqueConsecutivo(op.id, HOY, bloqueante.tipo);
+      const etiquetaTipo = bloqueante.tipo === 'vacaciones' ? 'vacaciones' : 'licencia';
+      const hastaTxt = bloque ? ` hasta ${DateUtil.formatDDMM(bloque.hasta)}-${DateUtil.parse(bloque.hasta).getFullYear()}` : '';
+      const claseTipo = bloqueante.tipo === 'vacaciones' ? 'estado-vacaciones' : 'estado-licencia';
+      return `
+        <tr class="hoy-row is-blocked">
+          <td class="col-nombre">${this.esc(op.apellidoNombre)}</td>
+          <td class="col-estado ${claseTipo}">${etiquetaTipo}${hastaTxt}</td>
+        </tr>
+      `;
+    }
+    // franco con fecha de goce hoy también bloquea solo el día
+    const franco = DB.eventos.find(e=> e.operadorId===op.id && e.fecha===HOY && e.tipo==='franco');
+    if(franco){
+      return `
+        <tr class="hoy-row is-blocked">
+          <td class="col-nombre">${this.esc(op.apellidoNombre)}</td>
+          <td class="col-estado estado-licencia" style="background:var(--sage-soft);color:var(--sage);">compensatorio</td>
+        </tr>
+      `;
+    }
+
+    const asistKey = `${op.id}_${HOY}`;
+    const estado = DB.asistenciaHoy[asistKey] || 'presente';
+    return `
+      <tr class="hoy-row">
+        <td class="col-nombre">${this.esc(op.apellidoNombre)}</td>
+        <td class="col-estado">
+          <div class="asist-switch" data-operador-id="${op.id}">
+            <button class="asist-btn ${estado==='presente'?'is-active presente':''}" data-estado="presente">Presente</button>
+            <button class="asist-btn ${estado==='ausente'?'is-active ausente':''}" data-estado="ausente">Ausente</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  onExportarVacMes(vacMes){
+    const filas = vacMes.map(v=> ({
+      'Operario': v.operador,
+      'Desde': v.desde,
+      'Hasta': v.hasta,
+      'Días': v.dias,
+    }));
+    const ws = XLSX.utils.json_to_sheet(filas);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Vacaciones del mes');
+    XLSX.writeFile(wb, `vacaciones_proximo_mes_${HOY}.xlsx`);
+    Toast.show('Excel exportado');
+  },
+
+  injectStyles(){
+    if(document.getElementById('hoyStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'hoyStyles';
+    style.textContent = `
+      .hoy-fecha-bar{ display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:11.5px; color:var(--ink-dim); margin-bottom:14px; text-transform:capitalize; }
+      .hoy-orden-label{ margin-left:auto; display:flex; align-items:center; gap:6px; font-size:11.5px; text-transform:none; font-family:var(--f-body); }
+      .hoy-orden-select{ width:auto; padding:4px 8px; font-size:11.5px; }
+      .hoy-grid{ display:grid; grid-template-columns:repeat(4, 0.85fr); gap:12px; align-items:start; }
+      .hoy-grid.no-coord{ grid-template-columns:1.15fr 1.15fr 0.9fr; }
+      @media (max-width:1300px){ .hoy-grid{ grid-template-columns:1fr 1fr; } .hoy-side-col{ grid-column:1 / -1; } }
+      @media (max-width:720px){ .hoy-grid{ grid-template-columns:1fr; } }
+      .hoy-side-col{ display:flex; flex-direction:column; gap:14px; }
+
+      .hoy-table{ width:100%; border-collapse:collapse; }
+      .hoy-row td{ padding:7px 13px; border-bottom:1px solid var(--line); font-size:11.5px; }
+      .hoy-row:last-child td{ border-bottom:none; }
+      .hoy-row .col-nombre{ font-weight:600; width:55%; font-size:11.5px; }
+      .hoy-row.is-blocked .col-nombre{ color:var(--ink-dim); }
+      .col-estado{ text-align:right; }
+      .estado-vacaciones, .estado-licencia{
+        display:inline-block; font-size:10.2px; font-weight:600; padding:3.5px 8px; border-radius:20px;
+      }
+      .estado-vacaciones{ background:var(--vacation-soft); color:#8A6520; }
+      .estado-licencia{ background:var(--brick-soft); color:var(--brick); }
+
+      .asist-switch{ display:inline-flex; border:1px solid var(--line); border-radius:20px; overflow:hidden; }
+      .asist-btn{ border:none; background:var(--white); padding:4.5px 10px; font-size:10.2px; font-weight:600; color:var(--ink-dim); transition:background .12s,color .12s; cursor:pointer; }
+      .asist-btn.is-active.presente{ background:var(--sage); color:#fff; }
+      .asist-btn.is-active.ausente{ background:var(--brick); color:#fff; }
+
+      .hoy-alerts{ padding:5px 0; }
+      .hoy-alert-item{ display:flex; align-items:center; gap:8px; padding:8px 15px; font-size:11.5px; border-bottom:1px solid var(--line); }
+      .hoy-alert-item:last-child{ border-bottom:none; }
+      .alert-dot{ width:5px; height:5px; border-radius:50%; background:var(--steel); flex:0 0 5px; }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindSwitches(el){
+    el.querySelectorAll('.asist-switch').forEach(group=>{
+      group.querySelectorAll('.asist-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> this.onToggleAsistencia(group.dataset.operadorId, btn.dataset.estado));
+      });
+    });
+  },
+
+  onToggleAsistencia(operadorId, estado){
+    const key = `${operadorId}_${HOY}`;
+    DB.asistenciaHoy[key] = estado;
+
+    // impacta en el calendario: pinta o borra la celda de "ausente" para hoy
+    DB.eventos = DB.eventos.filter(e=> !(e.operadorId===operadorId && e.fecha===HOY && e.tipo==='ausente'));
+    if(estado === 'ausente'){
+      DB.eventos.push({ id:'ev_aus_'+operadorId, operadorId, fecha:HOY, tipo:'ausente' });
+    }
+
+    const op = Domain.getOperador(operadorId);
+    Toast.show(`${op ? op.apellidoNombre : 'Operario'} marcado como ${estado}`);
+    this.render();
+    Bus.emit();
+  }
+};
+
+Router.renderers.hoy = () => ViewHoy.render();
+
+
+/* =======================================================================
+   view-anotaciones.js — PESTAÑA 5: Anotaciones y solicitudes
+   ======================================================================= */
+
+const ViewAnotaciones = {
+
+  render(){
+    const el = document.getElementById('view-anotaciones');
+    const opsHabilitados = DB.operadoresEnAnotaciones
+      .map(id=> Domain.getOperador(id))
+      .filter(Boolean);
+    const otrosOps = DB.operadores.filter(o=> !DB.operadoresEnAnotaciones.includes(o.id));
+
+    el.innerHTML = `
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Novedades por operario</h2>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <select id="anAddOperadorSel" class="an-add-sel">
+              <option value="">+ Agregar operario a la lista</option>
+              ${otrosOps.map(o=> `<option value="${o.id}">${this.esc(o.apellidoNombre)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div id="anList">
+          ${opsHabilitados.length === 0
+            ? `<div class="empty-state">No hay operarios en esta lista todavía. Agregá uno con el selector de arriba.</div>`
+            : opsHabilitados.map(op=> this.opRowHTML(op)).join('')
+          }
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h2>Otras notas</h2><span class="count">Texto libre — se guarda automáticamente</span></div>
+        <div style="padding:16px;">
+          <textarea id="anNotasGenerales" rows="7" placeholder="Anotaciones generales de la jornada, sin vincular a un operario...">${this.esc(DB.notasGenerales)}</textarea>
+        </div>
+      </div>
+    `;
+
+    this.injectStyles();
+    this.bindEvents(el);
+  },
+
+  opRowHTML(op){
+    const tarjetas = DB.anotaciones.filter(a=> a.operadorId === op.id)
+      .sort((a,b)=> a.fecha < b.fecha ? 1 : -1);
+    return `
+      <div class="an-op-row" data-operador-id="${op.id}">
+        <div class="an-op-name">
+          <button class="an-op-remove" data-id="${op.id}" title="Quitar de la lista" aria-label="Quitar de la lista">×</button>
+          ${this.esc(op.apellidoNombre)}
+        </div>
+        <div class="an-op-cards">
+          ${tarjetas.map(t=> this.cardHTML(t)).join('')}
+          <button class="an-card an-card-add" data-action="add-card" data-id="${op.id}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Agregar
+          </button>
+        </div>
+      </div>
+    `;
+  },
+
+  cardHTML(t){
+    return `
+      <div class="an-card" data-card-id="${t.id}">
+        <div class="an-card-text">${this.esc(t.texto)}</div>
+        <div class="an-card-foot">
+          <span class="an-card-date">${DateUtil.formatDDMM(t.fecha)}</span>
+          <div class="an-card-actions">
+            <button data-action="edit-card" data-id="${t.id}" aria-label="Editar">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+            </button>
+            <button data-action="del-card" data-id="${t.id}" aria-label="Eliminar">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  injectStyles(){
+    if(document.getElementById('anStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'anStyles';
+    style.textContent = `
+      .an-add-sel{ width:auto; font-size:12px; padding:6px 9px; }
+      .an-op-row{ display:flex; align-items:flex-start; gap:16px; padding:14px 18px; border-bottom:1px solid #EEEAE0; }
+      .an-op-row:last-child{ border-bottom:none; }
+      .an-op-name{ min-width:180px; flex:0 0 180px; font-weight:600; font-size:13px; padding-top:7px; display:flex; align-items:center; gap:8px; }
+      .an-op-remove{ background:none;border:none;color:var(--ink-dim);font-size:15px;line-height:1;opacity:.35;padding:0; }
+      .an-op-remove:hover{ opacity:1; color:var(--brick); }
+      .an-op-cards{ display:flex; flex-wrap:wrap; gap:8px; flex:1; }
+
+      .an-card{ background:var(--paper-dim); border:1px solid var(--line); border-radius:7px; padding:8px 11px; min-width:150px; max-width:230px; font-size:12px; }
+      .an-card-text{ line-height:1.4; margin-bottom:6px; word-break:break-word; }
+      .an-card-foot{ display:flex; align-items:center; justify-content:space-between; }
+      .an-card-date{ font-family:var(--f-mono); font-size:10.5px; color:var(--ink-dim); }
+      .an-card-actions{ display:flex; gap:6px; }
+      .an-card-actions button{ background:none; border:none; color:var(--ink-dim); padding:2px; opacity:.6; }
+      .an-card-actions button:hover{ opacity:1; color:var(--steel); }
+
+      .an-card-add{ display:flex; align-items:center; gap:5px; justify-content:center; background:transparent; border:1px dashed var(--line); color:var(--ink-dim); font-size:11.5px; font-weight:600; min-width:90px; align-self:stretch; }
+      .an-card-add:hover{ border-color:var(--steel); color:var(--steel); background:var(--steel-soft); }
+
+      #anNotasGenerales{ min-height:140px; font-size:13px; line-height:1.5; }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindEvents(el){
+    el.querySelectorAll('[data-action="add-card"]').forEach(btn=>{
+      btn.addEventListener('click', (e)=> this.openCardModal(e.currentTarget.dataset.id, null));
+    });
+    el.querySelectorAll('[data-action="edit-card"]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const tarjeta = DB.anotaciones.find(a=> a.id === e.currentTarget.dataset.id);
+        if(tarjeta) this.openCardModal(tarjeta.operadorId, tarjeta);
+      });
+    });
+    el.querySelectorAll('[data-action="del-card"]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        DB.anotaciones = DB.anotaciones.filter(a=> a.id !== e.currentTarget.dataset.id);
+        Toast.show('Anotación eliminada');
+        this.render();
+      });
+    });
+    el.querySelectorAll('.an-op-remove').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const id = e.currentTarget.dataset.id;
+        DB.operadoresEnAnotaciones = DB.operadoresEnAnotaciones.filter(x=> x !== id);
+        Toast.show('Operario quitado de la lista');
+        this.render();
+      });
+    });
+    const addSel = document.getElementById('anAddOperadorSel');
+    if(addSel){
+      addSel.addEventListener('change', (e)=>{
+        if(!e.target.value) return;
+        DB.operadoresEnAnotaciones.push(e.target.value);
+        this.render();
+      });
+    }
+    const notas = document.getElementById('anNotasGenerales');
+    if(notas){
+      let timer;
+      notas.addEventListener('input', ()=>{
+        clearTimeout(timer);
+        timer = setTimeout(()=>{
+          DB.notasGenerales = notas.value;
+          Toast.show('Notas guardadas');
+        }, 600);
+      });
+    }
+  },
+
+  openCardModal(operadorId, tarjetaExistente){
+    const op = Domain.getOperador(operadorId);
+    Modal.open({
+      title: tarjetaExistente ? 'Editar anotación' : 'Nueva anotación',
+      bodyHTML:`
+        <p>Para <strong>${this.esc(op ? op.apellidoNombre : '')}</strong></p>
+        <div class="field">
+          <label>Texto de la solicitud / novedad</label>
+          <textarea id="cardTextoInput" rows="3" placeholder="Ej: solicitó zapatos de trabajo">${this.esc(tarjetaExistente ? tarjetaExistente.texto : '')}</textarea>
+        </div>
+      `,
+      confirmText: tarjetaExistente ? 'Guardar cambios' : 'Agregar tarjeta',
+      onConfirm:(body)=>{
+        const texto = body.querySelector('#cardTextoInput').value.trim();
+        if(!texto) return false;
+        if(tarjetaExistente){
+          tarjetaExistente.texto = texto;
+          Toast.show('Anotación actualizada');
+        } else {
+          DB.anotaciones.push({ id:'an_'+Date.now(), operadorId, texto, fecha: HOY });
+          Toast.show('Anotación agregada');
+        }
+        this.render();
+      }
+    });
+  }
+};
+
+Router.renderers.anotaciones = () => ViewAnotaciones.render();
+
+/* =======================================================================
+   view-historial.js — PESTAÑA NUEVA: Historial de eventos
+   ======================================================================= */
+
+const ViewHistorial = {
+
+  render(){
+    const el = document.getElementById('view-historial');
+    const histVac = Domain.historialVacaciones();
+    const histFr = Domain.historialFrancos();
+    const histAus = Domain.historialAusenciasLicencias();
+
+    const opsConVac = Object.keys(histVac).map(id=> Domain.getOperador(id)).filter(Boolean);
+    const opsConFr = Object.keys(histFr).map(id=> Domain.getOperador(id)).filter(Boolean);
+    const opsConAus = Object.keys(histAus).map(id=> Domain.getOperador(id)).filter(Boolean);
+
+    el.innerHTML = `
+      <div class="hist-cols-3">
+        <div class="panel">
+          <div class="panel-head"><h2>Compensatorios tomados</h2><span class="count">${opsConFr.length}</span></div>
+          <div class="scroll-x">
+            ${opsConFr.length === 0 ? `<div class="empty-state">Sin compensatorios vencidos.</div>` : `
+            <table class="hist-table">
+              <thead><tr><th>Operario</th><th>Asignado</th><th>Tomó</th><th></th></tr></thead>
+              <tbody>
+                ${opsConFr.map(op=> this.francoRowsHTML(op, histFr[op.id])).join('')}
+              </tbody>
+            </table>`}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Vacaciones disfrutadas</h2><span class="count">${opsConVac.length}</span></div>
+          <div class="scroll-x">
+            ${opsConVac.length === 0 ? `<div class="empty-state">Sin vacaciones vencidas.</div>` : `
+            <table class="hist-table">
+              <thead><tr><th>Operario</th><th>Fecha</th><th>Días</th><th></th></tr></thead>
+              <tbody>
+                ${opsConVac.map(op=> this.vacRowsHTML(op, histVac[op.id])).join('')}
+              </tbody>
+            </table>`}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Ausencias y licencias</h2><span class="count">${opsConAus.length}</span></div>
+          <div class="scroll-x">
+            ${opsConAus.length === 0 ? `<div class="empty-state">Sin registros pasados.</div>` : `
+            <table class="hist-table">
+              <thead><tr><th>Operario</th><th>Aus.</th><th>Lic.</th></tr></thead>
+              <tbody>
+                ${opsConAus.map(op=> this.ausRowHTML(op, histAus[op.id])).join('')}
+              </tbody>
+            </table>`}
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.injectStyles();
+    this.bindEvents(el);
+  },
+
+  francoRowsHTML(op, data){
+    const eventos = data; // array de eventos tipo franco
+    return eventos.map((e,i)=> `
+      <tr data-evento-id="${e.id}">
+        <td class="col-nombre">${i===0 ? this.esc(op.apellidoNombre) : ''}</td>
+        <td>${e.origenFranco ? DateUtil.formatShort(e.origenFranco) : 'Sin fecha'}</td>
+        <td>${DateUtil.formatShort(e.fecha)}</td>
+        <td>
+          <button class="btn-icon row-delete-hist" data-evento-id="${e.id}" title="Quitar del historial" aria-label="Quitar del historial">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brick)" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  },
+
+  vacRowsHTML(op, data){
+    const { bloques, ids } = data;
+    return bloques.map((b,i)=> `
+      <tr data-bloque-ids="${ids.join(',')}">
+        <td class="col-nombre">${i===0 ? this.esc(op.apellidoNombre) : ''}</td>
+        <td>del ${DateUtil.formatShort(b.desde)} al ${DateUtil.formatShort(b.hasta)}</td>
+        <td>${b.dias}</td>
+        <td>
+          ${i===0 ? `<button class="btn-icon row-delete-hist-bloque" data-ids="${ids.join(',')}" title="Quitar del historial" aria-label="Quitar del historial">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brick)" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>
+          </button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  },
+
+  ausRowHTML(op, data){
+    const rowId = 'hist-aus-' + op.id;
+    return `
+      <tr>
+        <td class="col-nombre">${this.esc(op.apellidoNombre)}</td>
+        <td>
+          <button class="hist-counter" data-toggle="${rowId}-aus">${data.ausencias.length}</button>
+        </td>
+        <td>
+          <button class="hist-counter" data-toggle="${rowId}-lic">${data.licencias.length}</button>
+        </td>
+      </tr>
+      <tr id="${rowId}-aus" class="hist-detail-row" style="display:none;">
+        <td></td>
+        <td colspan="2">
+          ${data.ausencias.length === 0 ? '<span class="hint-text">Sin ausencias registradas</span>' :
+            data.ausencias.map(e=> `<span class="hist-detail-chip">${DateUtil.formatShort(e.fecha)} <button class="chip-del" data-evento-id="${e.id}" data-action="del-evento">×</button></span>`).join(' ')}
+        </td>
+      </tr>
+      <tr id="${rowId}-lic" class="hist-detail-row" style="display:none;">
+        <td></td>
+        <td colspan="2">
+          ${data.licencias.length === 0 ? '<span class="hint-text">Sin licencias registradas</span>' :
+            data.licencias.map(e=> `<span class="hist-detail-chip">${DateUtil.formatShort(e.fecha)} <button class="chip-del" data-evento-id="${e.id}" data-action="del-evento">×</button></span>`).join(' ')}
+        </td>
+      </tr>
+    `;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  injectStyles(){
+    if(document.getElementById('histStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'histStyles';
+    style.textContent = `
+      .hist-cols-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+      @media (max-width:1100px){ .hist-cols-3{ grid-template-columns:1fr 1fr; } }
+      @media (max-width:680px){ .hist-cols-3{ grid-template-columns:1fr; } }
+
+      .hist-table{ border-collapse:collapse; width:100%; font-size:12px; }
+      .hist-table th, .hist-table td{ border-bottom:1px solid #EEEAE0; border-right:1px solid #EEEAE0; padding:7px 10px; text-align:left; }
+      .hist-table thead th{ background:var(--paper-dim); font-weight:600; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-dim); }
+      .hist-table td.col-nombre{ font-weight:600; min-width:170px; }
+
+      .hist-counter{ background:var(--paper-dim); border:1px solid var(--line); border-radius:20px; padding:4px 11px; font-size:11.5px; font-weight:600; color:var(--ink); cursor:pointer; }
+      .hist-counter:hover{ background:var(--steel-soft); border-color:var(--steel); }
+      .hist-detail-row td{ background:#FBFAF7; padding:8px 10px; }
+      .hist-detail-chip{ display:inline-flex; align-items:center; gap:5px; background:var(--white); border:1px solid var(--line); border-radius:14px; padding:3px 4px 3px 10px; font-family:var(--f-mono); font-size:11px; margin:2px 4px 2px 0; }
+      .hint-text{ font-size:11px; color:var(--ink-dim); font-style:italic; }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindEvents(el){
+    el.querySelectorAll('.row-delete-hist').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const id = e.currentTarget.dataset.eventoId;
+        Modal.open({
+          title:'Quitar del historial',
+          bodyHTML:`<p>Este registro se va a ocultar del historial. El evento sigue marcado en el Calendario.</p>`,
+          confirmText:'Quitar',
+          onConfirm:()=>{
+            DB.historialOcultos.push(id);
+            Toast.show('Registro quitado del historial');
+            this.render();
+            Bus.emit();
+          }
+        });
+      });
+    });
+    el.querySelectorAll('.row-delete-hist-bloque').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const ids = e.currentTarget.dataset.ids.split(',');
+        Modal.open({
+          title:'Quitar del historial',
+          bodyHTML:`<p>Este bloque de vacaciones se va a ocultar del historial (${ids.length} día${ids.length===1?'':'s'}). El evento sigue marcado en el Calendario.</p>`,
+          confirmText:'Quitar',
+          onConfirm:()=>{
+            DB.historialOcultos.push(...ids);
+            Toast.show('Bloque quitado del historial');
+            this.render();
+            Bus.emit();
+          }
+        });
+      });
+    });
+    el.querySelectorAll('[data-action="del-evento"]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = e.currentTarget.dataset.eventoId;
+        DB.historialOcultos.push(id);
+        Toast.show('Registro quitado del historial');
+        this.render();
+        Bus.emit();
+      });
+    });
+    el.querySelectorAll('[data-toggle]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const targetId = e.currentTarget.dataset.toggle;
+        const row = document.getElementById(targetId);
+        if(row) row.style.display = row.style.display === 'none' ? '' : 'none';
+      });
+    });
+  }
+};
+
+Router.renderers.historial = () => ViewHistorial.render();
+
+/* =======================================================================
+   view-usuarios.js — PESTAÑA NUEVA: Usuarios (solo visible para rol admin)
+   ======================================================================= */
+
+const ViewUsuarios = {
+
+  render(){
+    const el = document.getElementById('view-usuarios');
+
+    if(RolActual !== 'admin'){
+      el.innerHTML = `<div class="empty-state">Esta sección es exclusiva para el administrador.</div>`;
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Crear nuevo usuario</h2>
+          <span class="count">Vos le pasás la contraseña al usuario por fuera de la app</span>
+        </div>
+        <div class="usr-form-row">
+          <div class="field" style="margin:0;">
+            <label>Usuario</label>
+            <input type="text" id="nuevoUsuarioInput" placeholder="ej: jperez">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Contraseña</label>
+            <input type="password" id="nuevoPassInput" placeholder="mínimo 6 caracteres">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Permiso</label>
+            <select id="nuevoRolSel">
+              <option value="total">Permiso total</option>
+              <option value="parcial">Permiso parcial</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btnCrearUsuario">Crear usuario</button>
+        </div>
+        <p id="crearUsuarioError" style="color:var(--brick);font-size:12px;padding:0 18px 14px;display:none;"></p>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head">
+          <h2>Usuarios existentes</h2>
+          <span class="count">${DB.usuarios.length} usuario${DB.usuarios.length===1?'':'s'}</span>
+        </div>
+        ${DB.usuarios.length === 0 ? `<div class="empty-state">Todavía no creaste usuarios adicionales. Vos (admin1) ya tenés acceso completo por defecto.</div>` : `
+        <table class="usr-table">
+          <thead><tr><th>Usuario</th><th>Permiso</th><th></th></tr></thead>
+          <tbody>
+            ${DB.usuarios.map(u=> this.rowHTML(u)).join('')}
+          </tbody>
+        </table>
+        `}
+      </div>
+    `;
+
+    this.injectStyles();
+    this.bindEvents(el);
+  },
+
+  rowHTML(u){
+    const etiquetaRol = u.rol === 'total' ? 'Permiso total' : 'Permiso parcial';
+    return `
+      <tr>
+        <td class="col-nombre">${this.esc(u.usuario)}</td>
+        <td><span class="usr-rol-pill usr-rol-${u.rol}">${etiquetaRol}</span></td>
+        <td>
+          <button class="btn-icon row-delete-usr" data-usuario-id="${u.id}" data-usuario-nombre="${this.esc(u.usuario)}" aria-label="Eliminar usuario" title="Eliminar usuario">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brick)" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  },
+
+  esc(s){ return (s||'').toString().replace(/"/g,'&quot;'); },
+
+  injectStyles(){
+    if(document.getElementById('usrStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'usrStyles';
+    style.textContent = `
+      .usr-form-row{ display:flex; align-items:flex-end; gap:14px; padding:16px 18px; flex-wrap:wrap; }
+      .usr-form-row .field input, .usr-form-row .field select{ width:200px; }
+      .usr-table{ border-collapse:collapse; width:100%; font-size:12.5px; }
+      .usr-table th, .usr-table td{ border-bottom:1px solid var(--line); padding:9px 18px; text-align:left; }
+      .usr-table thead th{ background:var(--paper-dim); font-weight:600; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-dim); }
+      .usr-table td.col-nombre{ font-weight:600; }
+      .usr-rol-pill{ display:inline-block; font-size:10.5px; font-weight:600; padding:3px 10px; border-radius:20px; }
+      .usr-rol-total{ background:var(--steel-soft); color:var(--steel); }
+      .usr-rol-parcial{ background:var(--umber-soft); color:var(--umber); }
+    `;
+    document.head.appendChild(style);
+  },
+
+  bindEvents(el){
+    const btnCrear = document.getElementById('btnCrearUsuario');
+    if(btnCrear){
+      btnCrear.addEventListener('click', async ()=>{
+        const usuario = document.getElementById('nuevoUsuarioInput').value.trim();
+        const pass = document.getElementById('nuevoPassInput').value;
+        const rol = document.getElementById('nuevoRolSel').value;
+        const errorEl = document.getElementById('crearUsuarioError');
+        errorEl.style.display = 'none';
+
+        if(!usuario || !pass){
+          errorEl.textContent = 'Completá usuario y contraseña.';
+          errorEl.style.display = 'block';
+          return;
+        }
+        if(pass.length < 6){
+          errorEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        btnCrear.disabled = true;
+        btnCrear.textContent = 'Creando...';
+        const res = await crearUsuario(usuario, pass, rol);
+        btnCrear.disabled = false;
+        btnCrear.textContent = 'Crear usuario';
+
+        if(res.ok){
+          Toast.show(`Usuario "${usuario}" creado`);
+          this.render();
+        } else {
+          errorEl.textContent = res.msg;
+          errorEl.style.display = 'block';
+        }
+      });
+    }
+
+    el.querySelectorAll('.row-delete-usr').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const usuarioId = e.currentTarget.dataset.usuarioId;
+        const nombre = e.currentTarget.dataset.usuarioNombre;
+        Modal.open({
+          title:'Eliminar usuario',
+          bodyHTML:`<p>¿Confirmás eliminar el acceso de <strong>${this.esc(nombre)}</strong>? La cuenta deja de poder iniciar sesión inmediatamente.</p>`,
+          confirmText:'Eliminar',
+          onConfirm:async ()=>{
+            await borrarUsuario(usuarioId);
+            Toast.show('Usuario eliminado');
+            this.render();
+          }
+        });
+      });
+    });
+  }
+};
+
+Router.renderers.usuarios = () => ViewUsuarios.render();
+
+
+
+
+/* =======================================================================
+   auth.js — login con usuario/contraseña + arranque controlado de la app
+   ======================================================================= */
+
+let _appIniciada = false;
+
+function usuarioToEmail(usuario){
+  return usuario.trim().toLowerCase().replace(/\s+/g,'') + '@' + AUTH_EMAIL_DOMAIN;
+}
+
+function mostrarLogin(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+function ocultarLogin(){
+  document.getElementById('loginScreen').classList.add('hidden');
+}
+
+function iniciarApp(user){
+  if(_appIniciada) return;
+  _appIniciada = true;
+  document.getElementById('whoUser').textContent = user.email.replace('@'+AUTH_EMAIL_DOMAIN,'');
+  iniciarSincronizacion();
+  Router.init();
+}
+
+function cerrarApp(){
+  _appIniciada = false;
+  detenerSincronizacion();
+}
+
+fbAuth.onAuthStateChanged(user=>{
+  if(user){
+    ocultarLogin();
+    iniciarApp(user);
+  } else {
+    cerrarApp();
+    mostrarLogin();
+  }
+});
+
+document.getElementById('loginForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const usuario = document.getElementById('loginUser').value;
+  const pass = document.getElementById('loginPass').value;
+  const errorBox = document.getElementById('loginError');
+  const loadingBox = document.getElementById('loginLoading');
+  errorBox.classList.remove('show');
+  loadingBox.classList.add('show');
+
+  fbAuth.signInWithEmailAndPassword(usuarioToEmail(usuario), pass)
+    .catch(err=>{
+      let msg = 'No se pudo iniciar sesión. Revisá usuario y contraseña.';
+      if(err.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Esperá unos minutos y volvé a intentar.';
+      if(err.code === 'auth/network-request-failed') msg = 'Sin conexión a internet.';
+      errorBox.textContent = msg;
+      errorBox.classList.add('show');
+    })
+    .finally(()=>{
+      loadingBox.classList.remove('show');
+    });
+});
+
+document.getElementById('btnLogout').addEventListener('click', ()=>{
+  fbAuth.signOut();
+});
+
+document.getElementById('btnCambiarPass').addEventListener('click', ()=>{
+  Modal.open({
+    title:'Cambiar mi contraseña',
+    bodyHTML:`
+      <div class="field">
+        <label>Contraseña actual</label>
+        <input type="password" id="passActualInput" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label>Contraseña nueva (mínimo 6 caracteres)</label>
+        <input type="password" id="passNuevaInput" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Repetir contraseña nueva</label>
+        <input type="password" id="passNuevaRepInput" autocomplete="new-password">
+      </div>
+      <p id="passCambioError" style="color:var(--brick);font-size:12px;display:none;"></p>
+    `,
+    confirmText:'Cambiar contraseña',
+    onConfirm:(body)=>{
+      const actual = body.querySelector('#passActualInput').value;
+      const nueva = body.querySelector('#passNuevaInput').value;
+      const rep = body.querySelector('#passNuevaRepInput').value;
+      const errorEl = body.querySelector('#passCambioError');
+      const mostrarError = (msg)=>{ errorEl.textContent = msg; errorEl.style.display = 'block'; };
+
+      if(!actual || !nueva || !rep){ mostrarError('Completá los tres campos.'); return false; }
+      if(nueva !== rep){ mostrarError('Las contraseñas nuevas no coinciden.'); return false; }
+      if(nueva.length < 6){ mostrarError('La contraseña nueva debe tener al menos 6 caracteres.'); return false; }
+
+      cambiarMiPassword(actual, nueva).then(res=>{
+        if(res.ok){ Toast.show('Contraseña actualizada'); Modal.close(); }
+        else { mostrarError(res.msg); }
+      });
+      return false; // el cierre lo maneja la promesa de arriba
+    }
+  });
+});
+</script>
+</body>
+</html>
